@@ -45,6 +45,17 @@ repository files, tests, or Codex's native compaction.
 8. Report the checkpoint id, evidence used, validation performed, and any
    missing or stale information.
 
+## Notification contract
+
+- Hook-driven healthy prompts, tool calls, and Stop events are silent. Do not
+  create a user-facing continuation solely to restate ContextGC health.
+- A healthy compaction uses one line. A recovery, restore, or integrity warning
+  uses at most three lines and 240 characters.
+- Keep identifiers and local paths out of hook notifications. Report a
+  checkpoint ID only when the user explicitly requests the operation result.
+- Put detailed explanations in the README or an explicit status response. Do
+  not repeat onboarding on resume.
+
 ## Safety rules
 
 - Do not automatically delete persisted non-secret evidence or represent

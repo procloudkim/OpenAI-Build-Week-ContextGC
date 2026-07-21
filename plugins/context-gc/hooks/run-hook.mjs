@@ -6,6 +6,11 @@ import { dirname, isAbsolute, resolve } from "node:path";
 
 const STATE_SCHEMA_VERSION = 1;
 const FRAME_SCHEMA_VERSION = 1;
+const NOTICE_SCHEMA_VERSION = 1;
+const CONTEXT_GC_VERSION = "0.1.6";
+const README_URL = "https://github.com/procloudkim/OpenAI-Build-Week-ContextGC#readme";
+const MAX_USER_NOTICE_CHARS = 240;
+const MAX_USER_NOTICE_LINES = 3;
 const MAX_SESSION_CONTEXT_CHARS = 6_000;
 const MAX_PROMPT_CONTEXT_CHARS = 4_500;
 const CHECKPOINT_TOOL_EVENT_LIMIT = 6;
@@ -79,8 +84,11 @@ async function main() {
     } else if (input.hook_event_name === "PreCompact") {
       process.stdout.write(`${JSON.stringify({
         continue: true,
-        systemMessage:
-          "ContextGC hit an unexpected protection error. Manual native compaction is not represented as protected.",
+        systemMessage: userNotice([
+          "ContextGC: manual compaction protection failed.",
+          "Recovery from this compaction is not verified.",
+          `Guide: ${README_URL}`,
+        ]),
       })}\n`);
     }
     const failureMode = isFailClosedPrecompact ? "failed closed" : "failed safely";
@@ -129,24 +137,37 @@ async function onSessionStart({ input, root, sessionHash, turnHash, state, state
     if (source === "compact") {
       return {
         continue: true,
-        systemMessage:
-          "ContextGC found no integrity-verified checkpoint after native compaction. No synthetic context was injected.",
+        systemMessage: userNotice([
+          "ContextGC: compaction recovery is unverified.",
+          "No checkpoint content was injected.",
+          `Action: ${README_URL}`,
+        ]),
       };
     }
     return {
       continue: true,
       systemMessage: frameResult.status === "MISSING_LATEST"
-        ? "ContextGC has no integrity-verified checkpoint yet. It will request one once in the first writable turn; automatic compaction remains protected until then."
-        : "ContextGC found an invalid or legacy checkpoint. It will request bounded recovery once in the first writable turn; no checkpoint content was injected.",
+        ? userNotice([
+            "ContextGC: protection setup required.",
+            "No verified checkpoint; automatic compaction remains guarded.",
+            `Guide: ${README_URL}`,
+          ])
+        : userNotice([
+            "ContextGC: invalid or legacy checkpoint.",
+            "No checkpoint content was injected; recovery is required.",
+            `Guide: ${README_URL}`,
+          ]),
     };
   }
 
   rememberVerifiedCheckpoint(state, frameResult);
   state.lastInjectionAt = new Date().toISOString();
   await writeState(statePath, state);
+  const systemMessage = await startupNotice(root, source);
   return additionalContextOutput(
     "SessionStart",
     renderTaskFrame(frameResult.frame, MAX_SESSION_CONTEXT_CHARS, storeIdForRoot(root)),
+    systemMessage,
   );
 }
 
@@ -180,7 +201,11 @@ async function onUserPromptSubmit({ input, root, sessionHash, turnHash, state, s
     return input.permission_mode === "plan"
       ? additionalContextOutput(
           "UserPromptSubmit",
-          "ContextGC has no integrity-verified checkpoint. This is a Plan-mode turn, so do not create one or compact. Automatic compaction remains fail-closed until a later writable turn creates a verified checkpoint.",
+          userNotice([
+            `ContextGC checkpoint status: ${publicFrameStatus(frameResult.status)}.`,
+            "Plan-mode turn: do not create a checkpoint or compact.",
+            "Use a later writable turn; see README.",
+          ]),
         )
       : checkpointBootstrapOutput("UserPromptSubmit", frameResult.status);
   }
@@ -201,9 +226,12 @@ async function onUserPromptSubmit({ input, root, sessionHash, turnHash, state, s
 async function onPostToolUse({ input, root, sessionHash, turnHash, state, statePath }) {
   const toolName = asString(input.tool_name, "unknown");
   const checkpointAttempted = /(?:^|__)contextgc_checkpoint$/u.test(toolName);
+  const restoreAttempted = /(?:^|__)contextgc_restore$/u.test(toolName);
   const checkpointReported = checkpointAttempted && !responseIsError(input.tool_response);
-  const checkpointIntegrity = checkpointReported ? await readVerifiedTaskFrame(root) : null;
-  const checkpointReceipt = checkpointReported
+  const restoreReported = restoreAttempted && !responseIsError(input.tool_response);
+  const operationReported = checkpointReported || restoreReported;
+  const operationIntegrity = operationReported ? await readVerifiedTaskFrame(root) : null;
+  const operationReceipt = operationReported
     ? checkpointReceiptFromResponse(input.tool_response)
     : null;
   const toolDataDir = isObject(input.tool_input) ? input.tool_input.dataDir : undefined;
@@ -213,28 +241,36 @@ async function onPostToolUse({ input, root, sessionHash, turnHash, state, stateP
     samePath(resolve(toolDataDir), root);
   const inferredDataDirMatches =
     toolDataDir === undefined &&
-    checkpointReceipt !== null &&
-    checkpointReceipt.storeId === storeIdForRoot(root) &&
-    SAFE_DEFAULT_DATA_SOURCES.has(checkpointReceipt.dataDirSource);
+    operationReceipt !== null &&
+    operationReceipt.storeId === storeIdForRoot(root) &&
+    SAFE_DEFAULT_DATA_SOURCES.has(operationReceipt.dataDirSource);
   const dataDirMatches = explicitDataDirMatches || inferredDataDirMatches;
   const recentCheckpoint =
-    checkpointIntegrity?.valid === true &&
-    Date.now() - checkpointIntegrity.modifiedAt >= 0 &&
-    Date.now() - checkpointIntegrity.modifiedAt <= CHECKPOINT_WRITE_WINDOW_MS;
+    operationIntegrity?.valid === true &&
+    Date.now() - operationIntegrity.modifiedAt >= 0 &&
+    Date.now() - operationIntegrity.modifiedAt <= CHECKPOINT_WRITE_WINDOW_MS;
+  const receiptMatchesIntegrity =
+    operationReceipt !== null &&
+    operationIntegrity?.valid === true &&
+    operationReceipt.checkpointId === operationIntegrity.manifest.checkpointId &&
+    operationReceipt.createdAt === operationIntegrity.manifest.createdAt &&
+    operationReceipt.frameHash === operationIntegrity.frameRef.hash;
   const checkpointWritten =
     checkpointReported &&
     dataDirMatches &&
     recentCheckpoint &&
-    checkpointReceipt !== null &&
-    checkpointReceipt.checkpointId === checkpointIntegrity.manifest.checkpointId &&
-    checkpointReceipt.createdAt === checkpointIntegrity.manifest.createdAt &&
-    checkpointReceipt.frameHash === checkpointIntegrity.frameRef.hash &&
-    checkpointIntegrity.manifest.checkpointId !== state.lastVerifiedCheckpointId;
+    receiptMatchesIntegrity &&
+    operationIntegrity.manifest.checkpointId !== state.lastVerifiedCheckpointId;
+  const restoreVerified =
+    restoreReported &&
+    dataDirMatches &&
+    recentCheckpoint &&
+    receiptMatchesIntegrity;
 
-  if (checkpointWritten) {
+  if (checkpointWritten || restoreVerified) {
     state.toolEventsSinceCheckpoint = 0;
-    rememberVerifiedCheckpoint(state, checkpointIntegrity);
-    state.lastCheckpointAt = checkpointIntegrity.manifest.createdAt;
+    rememberVerifiedCheckpoint(state, operationIntegrity);
+    state.lastCheckpointAt = operationIntegrity.manifest.createdAt;
     state.precompactBlockedTurn = null;
     state.lastCheckpointReminderTurn = null;
   } else {
@@ -245,6 +281,7 @@ async function onPostToolUse({ input, root, sessionHash, turnHash, state, stateP
   let bootstrapFrameStatus = null;
   if (
     !checkpointWritten &&
+    !restoreVerified &&
     state.lastVerifiedCheckpointId === null &&
     state.toolEventsSinceCheckpoint >= CHECKPOINT_BOOTSTRAP_EVENT_LIMIT &&
     state.lastCheckpointReminderTurn !== turnHash &&
@@ -263,7 +300,11 @@ async function onPostToolUse({ input, root, sessionHash, turnHash, state, stateP
   await appendLedger(root, "hook.post-tool-use", {
     sessionHash,
     turnHash,
-    toolCategory: checkpointAttempted ? "contextgc_checkpoint" : "other",
+    toolCategory: checkpointAttempted
+      ? "contextgc_checkpoint"
+      : restoreAttempted
+        ? "contextgc_restore"
+        : "other",
     toolNameHash: shortHash(toolName),
     toolUseHash: shortHash(asString(input.tool_use_id, "unknown-tool-use")),
     inputKeyCount: topLevelKeyCount(input.tool_input),
@@ -271,15 +312,39 @@ async function onPostToolUse({ input, root, sessionHash, turnHash, state, stateP
     responseBytesApprox: approximateJsonBytes(input.tool_response),
     checkpointAttempted,
     checkpointReported,
-    checkpointReceiptAvailable: checkpointReceipt !== null,
+    checkpointReceiptAvailable: operationReceipt !== null,
     checkpointDataDirMatches: dataDirMatches,
     checkpointWritten,
+    restoreAttempted,
+    restoreReported,
+    restoreVerified,
     bootstrapFrameStatus,
     bootstrapReminderIssued: bootstrapReminder !== null,
   });
   const statePersisted = await writeState(statePath, state);
   if (bootstrapReminder !== null && statePersisted) {
     return additionalContextOutput("PostToolUse", bootstrapReminder);
+  }
+  if (restoreVerified && statePersisted) {
+    return systemNotice([
+      "ContextGC: restore verified.",
+      "Restored: Task Frame and evidence pointers.",
+      "Not restored: Git, files, commands, or external side effects.",
+    ]);
+  }
+  if (restoreVerified && !statePersisted) {
+    return systemNotice([
+      "ContextGC: restore integrity passed, but hook state was not persisted.",
+      "Do not rely on automatic recovery yet.",
+      "Action: run contextgc_status; see README.",
+    ]);
+  }
+  if (restoreReported && !restoreVerified) {
+    return systemNotice([
+      "ContextGC: restore could not be verified by the hook.",
+      "Do not rely on recovered context yet.",
+      "Action: run contextgc_status; see README.",
+    ]);
   }
   // Ordinary PostToolUse events return no model-visible context. The one-shot
   // bootstrap reminder reads only bounded checkpoint metadata, never the
@@ -292,10 +357,17 @@ async function onPreCompact({ input, root, sessionHash, turnHash, state, statePa
   const triggerLabel = trigger === "manual" || trigger === "auto" ? trigger : "unknown";
   const failClosed = trigger !== "manual";
   const frameResult = await readVerifiedTaskFrame(root);
+  const frameAgeMs = frameResult.valid ? Date.now() - frameResult.modifiedAt : 0;
+  const checkpointReviewDue =
+    frameResult.valid &&
+    state.toolEventsSinceCheckpoint > 0 &&
+    (state.toolEventsSinceCheckpoint >= CHECKPOINT_TOOL_EVENT_LIMIT ||
+      frameAgeMs >= CHECKPOINT_STALE_MS);
+  const frameProtectable = frameResult.valid && !checkpointReviewDue;
   let snapshotWritten = false;
   let snapshotName = null;
 
-  if (frameResult.valid) {
+  if (frameProtectable) {
     snapshotName = `${new Date().toISOString().replaceAll(":", "-")}-${turnHash}-${triggerLabel}.json`;
     const snapshotPath = resolve(
       root,
@@ -314,7 +386,7 @@ async function onPreCompact({ input, root, sessionHash, turnHash, state, statePa
     }
   }
 
-  if (frameResult.valid && snapshotWritten) {
+  if (frameProtectable && snapshotWritten) {
     state.precompactBlockedTurn = null;
     state.pendingPrecompact = {
       turnHash,
@@ -332,6 +404,7 @@ async function onPreCompact({ input, root, sessionHash, turnHash, state, statePa
       trigger: triggerLabel,
       frameAvailable: true,
       checkpointVerified: true,
+      checkpointReviewDue: false,
       frameStatus: frameResult.status,
       snapshotWritten: true,
       statePersisted,
@@ -343,11 +416,11 @@ async function onPreCompact({ input, root, sessionHash, turnHash, state, statePa
     }
 
     if (!failClosed) {
-      return {
-        continue: true,
-        systemMessage:
-          "ContextGC verified the checkpoint and snapshot, but could not persist hook state. Manual native compaction is not represented as fully protected.",
-      };
+      return systemNotice([
+        "ContextGC: manual compaction is not fully protected.",
+        "The hook state could not be persisted.",
+        `Guide: ${README_URL}`,
+      ]);
     }
 
     return autoCompactionBlocked(true, false, "HOOK_STATE_WRITE_FAILED");
@@ -369,6 +442,7 @@ async function onPreCompact({ input, root, sessionHash, turnHash, state, statePa
     trigger: triggerLabel,
     frameAvailable: frameResult.valid,
     checkpointVerified: frameResult.valid,
+    checkpointReviewDue,
     frameStatus: frameResult.status,
     snapshotWritten,
     statePersisted,
@@ -378,29 +452,43 @@ async function onPreCompact({ input, root, sessionHash, turnHash, state, statePa
     // Automatic compaction remains blocked on every retry until all three
     // invariants are established. The persisted turn marker changes only the
     // message; it never converts an unverified retry into permission.
-    const failureStatus = frameResult.valid ? "SNAPSHOT_WRITE_FAILED" : frameResult.status;
+    const failureStatus = checkpointReviewDue
+      ? "CHECKPOINT_STALE"
+      : frameResult.valid
+        ? "SNAPSHOT_WRITE_FAILED"
+        : frameResult.status;
     return autoCompactionBlocked(firstBlockForTurn, statePersisted, failureStatus);
   }
 
-  return {
-    continue: true,
-    systemMessage:
-      "ContextGC could not establish a verified checkpoint, reversible snapshot, and persisted hook state. Manual native compaction is not represented as protected.",
-  };
+  return systemNotice([
+    "ContextGC: manual compaction is not protected.",
+    checkpointReviewDue
+      ? "The checkpoint does not include recent work."
+      : "Checkpoint or snapshot integrity is incomplete.",
+    `Guide: ${README_URL}`,
+  ]);
 }
 
 function autoCompactionBlocked(firstBlockForTurn, statePersisted, failureStatus) {
-  const retry = firstBlockForTurn ? "" : " retry";
   const diagnostic = publicFrameStatus(failureStatus);
-  const guardNote = statePersisted
-    ? "The same-turn guard is persisted."
-    : "The same-turn guard could not be persisted, so automatic compaction remains fail-closed.";
+  const retryLine = firstBlockForTurn
+    ? `ContextGC: protection incomplete (${diagnostic}).`
+    : "ContextGC: automatic compaction retry remains paused.";
+  const actionLine = failureStatus === "CHECKPOINT_STALE"
+    ? "Create or refresh one verified checkpoint, then retry."
+    : statePersisted
+      ? "Create or repair one verified checkpoint, then retry."
+      : "The hook state could not be persisted; protection remains fail-closed.";
   return {
     continue: false,
-    stopReason:
-      `ContextGC paused automatic compaction${retry} because checkpoint, snapshot, and hook-state integrity were not all established (diagnostic: ${diagnostic}).`,
-    systemMessage:
-      `Automatic compaction${retry} remains paused. In a writable turn, ask Codex to create or repair one integrity-verified ContextGC checkpoint without passing a dataDir, then retry. ${guardNote}`,
+    stopReason: userNotice([
+      `ContextGC: automatic compaction paused (${diagnostic}).`,
+    ]),
+    systemMessage: userNotice([
+      retryLine,
+      actionLine,
+      `Guide: ${README_URL}`,
+    ]),
   };
 }
 
@@ -470,7 +558,16 @@ async function onPostCompact({ input, root, sessionHash, turnHash, state, stateP
     protectedSnapshotVerified: pendingSnapshotVerified,
     statePersisted,
   });
-  return undefined;
+  if (pendingSnapshotVerified && statePersisted) {
+    return systemNotice([
+      "ContextGC: protected compaction complete; Task Frame preserved; native summary opaque.",
+    ]);
+  }
+  return systemNotice([
+    "ContextGC: compaction recovery protection is incomplete.",
+    "The last verified checkpoint remains; recovery may be partial.",
+    `Action: ${README_URL}`,
+  ]);
 }
 
 async function onStop({ input, root, sessionHash, turnHash, state, statePath }) {
@@ -483,51 +580,85 @@ async function onStop({ input, root, sessionHash, turnHash, state, statePath }) 
     frameAvailable: frameResult.valid,
     checkpointVerified: frameResult.valid,
     toolEventsSinceCheckpoint: state.toolEventsSinceCheckpoint,
+    modelTurnRequested: false,
   });
-
-  if (
-    input.stop_hook_active === true ||
-    input.permission_mode === "plan" ||
-    state.lastContinuationTurn === turnHash
-  ) {
-    return undefined;
-  }
-
-  const frameTimestamp = frameResult.valid ? frameResult.modifiedAt : 0;
-  const lastCheckpointAt = Math.max(dateMs(state.lastCheckpointAt), frameTimestamp);
-  const stale = lastCheckpointAt > 0 && Date.now() - lastCheckpointAt >= CHECKPOINT_STALE_MS;
-  const missingAfterWork = !frameResult.valid && state.toolEventsSinceCheckpoint >= 2;
-  const eventLimitReached = state.toolEventsSinceCheckpoint >= CHECKPOINT_TOOL_EVENT_LIMIT;
-  const precompactGuardFired = state.precompactBlockedTurn === turnHash;
-  const checkpointDue = stale || missingAfterWork || eventLimitReached || precompactGuardFired;
-
-  if (!checkpointDue) {
-    return undefined;
-  }
-
-  if (frameResult.valid) rememberVerifiedCheckpoint(state, frameResult);
-  state.lastContinuationTurn = turnHash;
-  if (!(await writeState(statePath, state))) {
-    // Fail closed: do not synthesize a continuation when its recursion guard
-    // could not be persisted.
-    return undefined;
-  }
-
-  return {
-    decision: "block",
-    reason:
-      "ContextGC review is due. If verified candidate atoms and observed telemetry-derived usage proxies are available, call contextgc_plan exactly once without dataDir and with those inputs. PREPARE means reversible checkpoint preparation only, never native compaction: on PREPARE, call contextgc_checkpoint exactly once without dataDir and with a concise Task Frame based only on verified current files and tool results. Include goal, constraints, decisions, openLoops, activeFiles, testEvidence, failedAttempts, and evidencePointers, preserving exact constraints and values. On HOLD, finish without checkpointing. If the planner inputs or tool are unavailable, state that boundary and finish without inventing a plan or checkpoint. Do not compact, delete persisted non-secret evidence, or perform unrelated work.",
-  };
+  // Stop is observability-only. It must never force another model turn merely
+  // because tool-count or wall-clock thresholds were crossed. Safety review is
+  // deferred to the real PreCompact boundary, where stale work can be blocked
+  // without interrupting ordinary conversation.
+  return undefined;
 }
 
-function additionalContextOutput(hookEventName, additionalContext) {
-  return {
+function additionalContextOutput(hookEventName, additionalContext, systemMessage = null) {
+  const output = {
     continue: true,
     hookSpecificOutput: {
       hookEventName,
       additionalContext,
     },
   };
+  if (systemMessage !== null) output.systemMessage = systemMessage;
+  return output;
+}
+
+function systemNotice(lines) {
+  return {
+    continue: true,
+    systemMessage: userNotice(lines),
+  };
+}
+
+function userNotice(lines) {
+  if (!Array.isArray(lines) || lines.length < 1 || lines.length > MAX_USER_NOTICE_LINES) {
+    throw new RangeError("ContextGC user notice must contain one to three lines");
+  }
+  const notice = lines.join("\n");
+  if (notice.length > MAX_USER_NOTICE_CHARS) {
+    throw new RangeError("ContextGC user notice exceeds 240 characters");
+  }
+  return notice;
+}
+
+async function startupNotice(root, source) {
+  if (source !== "startup") return null;
+  const path = resolve(root, "hook-state", "notice-state.json");
+  const noticeState = await readNoticeState(path);
+  if (noticeState.onboardingVersion !== CONTEXT_GC_VERSION) {
+    const next = {
+      schemaVersion: NOTICE_SCHEMA_VERSION,
+      onboardingVersion: CONTEXT_GC_VERSION,
+    };
+    if (await writeState(path, next)) {
+      return userNotice([
+        "Thanks for trusting ContextGC: checkpoint verified.",
+        "Task -> checkpoint -> compact -> verified recovery",
+        `Guide / Star: ${README_URL}`,
+      ]);
+    }
+  }
+  return userNotice([
+    "ContextGC active: verified checkpoint loaded.",
+    "Task -> checkpoint -> compact -> verified recovery",
+  ]);
+}
+
+async function readNoticeState(path) {
+  try {
+    const value = JSON.parse(
+      (await readBoundedFile(path, MAX_HOOK_STATE_BYTES)).toString("utf8"),
+    );
+    if (
+      isObject(value) &&
+      value.schemaVersion === NOTICE_SCHEMA_VERSION &&
+      typeof value.onboardingVersion === "string" &&
+      value.onboardingVersion.length <= 32
+    ) {
+      return { onboardingVersion: value.onboardingVersion };
+    }
+  } catch {
+    // Missing or invalid notice state is replaced after a verified startup.
+  }
+  return { onboardingVersion: null };
 }
 
 function resolveDataRoot(input) {
@@ -784,20 +915,17 @@ function checkpointBootstrapOutput(hookEventName, status) {
 function renderCheckpointBootstrap(status) {
   const diagnostic = `ContextGC checkpoint status: ${publicFrameStatus(status)}.`;
   if (status !== "MISSING_LATEST") {
-    return [
-      "ContextGC integrity recovery boundary.",
+    return userNotice([
       diagnostic,
-      "Call contextgc_status without dataDir. Restore a known integrity-verified checkpoint before native compaction. If no valid checkpoint can be restored, create a new checkpoint only from facts verified in the current task and state explicitly that earlier context was not recovered.",
-      "Do not invent prior context, include secrets, or compact until recovery succeeds.",
-    ].join("\n");
+      "Restore a verified checkpoint, or create one from current verified facts.",
+      "Do not compact, delete evidence, or invent prior context.",
+    ]);
   }
-  return [
-    "ContextGC explicit safety boundary: create the first local checkpoint before extended work or native compaction.",
+  return userNotice([
     diagnostic,
-    "Call contextgc_checkpoint exactly once without dataDir and with a concise Task Frame based only on the current user request plus verified files and tool results.",
-    "Preserve exact goals, constraints, decisions, open loops, active files, test evidence, failed attempts, and evidence pointers. Use empty arrays when no verified value exists.",
-    "Do not invent facts, include secrets, or compact as part of checkpoint creation.",
-  ].join("\n");
+    "Call contextgc_checkpoint once without dataDir using verified current-task facts.",
+    "Do not compact, delete evidence, or invent prior context.",
+  ]);
 }
 
 function appendWithin(lines, candidate, maxChars) {
@@ -831,7 +959,6 @@ function defaultState(sessionHash) {
     sessionHash,
     toolEventsSinceCheckpoint: 0,
     lastCheckpointAt: null,
-    lastContinuationTurn: null,
     lastInjectionAt: null,
     lastCompactionAt: null,
     lastCompactionTrigger: null,
@@ -853,7 +980,6 @@ function sanitizeState(value, sessionHash) {
     sessionHash,
     toolEventsSinceCheckpoint: boundedInteger(value.toolEventsSinceCheckpoint, 0, 10_000),
     lastCheckpointAt: isoDateOrNull(value.lastCheckpointAt),
-    lastContinuationTurn: shortHashOrNull(value.lastContinuationTurn),
     lastInjectionAt: isoDateOrNull(value.lastInjectionAt),
     lastCompactionAt: isoDateOrNull(value.lastCompactionAt),
     lastCompactionTrigger: compactionTriggerOrNull(value.lastCompactionTrigger),
@@ -1130,6 +1256,7 @@ function publicFrameStatus(status) {
   ) {
     return "PROTECTION_INCOMPLETE";
   }
+  if (status === "CHECKPOINT_STALE") return "STALE";
   return "INVALID";
 }
 

@@ -1,6 +1,6 @@
 # ContextGC 사용자 매뉴얼
 
-> 적용 버전: ContextGC 0.1.5
+> 적용 버전: ContextGC 0.1.6
 > 검증 환경: Windows PowerShell, Node.js 22.13 이상, Codex CLI 0.144.5
 > 문서 검증일: 2026-07-19
 
@@ -100,7 +100,7 @@ git --version
 $cloneRoot = Join-Path $env:USERPROFILE 'source\repos'
 New-Item -ItemType Directory -Path $cloneRoot -Force | Out-Null
 Set-Location $cloneRoot
-git clone https://github.com/procloudkim/OpenAI-Build-Week-ContextGC.git
+git clone https://github.com/procloudkim/OpenAI-Build-Week-ContextGC.git context-gc
 Set-Location .\context-gc
 git remote -v
 ```
@@ -130,7 +130,7 @@ codex plugin list
 기대 결과:
 
 ```text
-context-gc@context-gc-local  installed, enabled  0.1.5
+context-gc@context-gc-local  installed, enabled  0.1.6
 ```
 
 이미 같은 로컬 marketplace가 등록되어 있다면 중복 추가 오류가 날 수
@@ -197,8 +197,8 @@ Get-FileHash -LiteralPath '.\plugins\context-gc\hooks\hooks.json' -Algorithm SHA
 | `UserPromptSubmit` | 현재 프롬프트 경계에 Task Frame을 제한적으로 주입 |
 | `PostToolUse` | 저비용 사실 메타데이터와 체크포인트 근거를 기록 |
 | `PreCompact` | 최신 체크포인트와 archive 무결성을 확인하고 보호 스냅샷 준비 |
-| `PostCompact` | lifecycle 발생과 측정 경계를 기록 |
-| `Stop` | 정책상 필요할 때 한 번의 계획·체크포인트 연속 작업을 요청 |
+| `PostCompact` | 완료 경계를 기록하고 제한된 결과 알림을 한 번 표시 |
+| `Stop` | 메타데이터만 기록하고 모델 연속 턴은 만들지 않음 |
 
 각 Windows 명령은 Node.js로 `${PLUGIN_ROOT}\hooks\run-hook.mjs`를 가져오며
 timeout은 5초입니다. `/hooks`에 표시된 명령, 이벤트와 matcher가 이 파일과
@@ -219,6 +219,12 @@ timeout은 5초입니다. `/hooks`에 표시된 명령, 이벤트와 matcher가 
 
 공식 동작 설명은 [Codex hooks](https://learn.chatgpt.com/docs/hooks)와
 [Build plugins](https://learn.chatgpt.com/docs/build-plugins)을 참고하십시오.
+
+새로 신뢰한 버전의 첫 검증 startup은 3줄 온보딩을 한 번만 표시합니다.
+이후의 새 startup은 2줄 lifecycle 와이어프레임만 표시하고 resume은
+조용히 복구합니다. 정상 prompt, tool, Stop hook은 사용자 알림을 만들지
+않습니다. 보호된 compaction은 1줄, 복구 또는 무결성 경고는 최대 3줄·240자로
+제한합니다. 자세한 설명은 이 매뉴얼이나 명시적 status 요청에서 확인합니다.
 
 ## 5. 첫 체크포인트 만들기
 
@@ -464,7 +470,7 @@ finally {
 }
 ```
 
-ContextGC 0.1.5의 기대 결과는 다음과 같습니다.
+ContextGC 0.1.6의 기대 결과는 다음과 같습니다.
 
 ```text
 ok                    : True

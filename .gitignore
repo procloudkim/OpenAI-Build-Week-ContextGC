@@ -13,6 +13,7 @@ dist/
 *.log
 *.tgz
 .DS_Store
+PRIVATE-DEVPOST-*
 site/node_modules/
 site/.next/
 site/dist/

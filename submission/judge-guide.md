@@ -27,7 +27,7 @@ Requirements: Git and Node.js 22.13 or newer. No dependency installation, API
 key or rebuild is needed for this receipt path.
 
 ```powershell
-git clone https://github.com/procloudkim/OpenAI-Build-Week-ContextGC.git
+git clone https://github.com/procloudkim/OpenAI-Build-Week-ContextGC.git context-gc
 Set-Location context-gc
 node scripts/contextgc.bundle.mjs simulate
 ```

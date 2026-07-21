@@ -1,6 +1,6 @@
 # Install ContextGC
 
-ContextGC `0.1.5` is a prebuilt Codex plugin for Node.js 22.13 or newer. No
+ContextGC `0.1.6` is a prebuilt Codex plugin for Node.js 22.13 or newer. No
 TypeScript build or separate OpenAI API key is required for normal plugin use.
 
 ## Before installation
@@ -13,7 +13,7 @@ TypeScript build or separate OpenAI API key is required for normal plugin use.
 ## Clone and install
 
 ```powershell
-git clone https://github.com/procloudkim/OpenAI-Build-Week-ContextGC.git
+git clone https://github.com/procloudkim/OpenAI-Build-Week-ContextGC.git context-gc
 Set-Location context-gc
 codex plugin marketplace add .
 codex plugin add context-gc@context-gc-local
@@ -23,7 +23,7 @@ codex plugin list
 Expected observable: the list contains:
 
 ```text
-context-gc@context-gc-local  installed, enabled  0.1.5
+context-gc@context-gc-local  installed, enabled  0.1.6
 ```
 
 If you already have the clone, run the final three commands from its root.
@@ -44,6 +44,21 @@ Expected observable: the JSON contains `context-gc` and `ContextGC` skill
 metadata. `prompt-input` is an experimental diagnostic command, not the normal
 user workflow.
 
+## Notification behavior
+
+- The first verified startup after a newly trusted ContextGC version shows one
+  three-line onboarding notice with the README link.
+- Later fresh startups show a two-line lifecycle wireframe. Resume is silent.
+- Healthy prompts, tool calls, and `Stop` events are silent.
+- A protected compaction reports one line. A recovery or integrity warning uses
+  at most three lines.
+- Successful restore reports its scope without identifiers: Task Frame metadata
+  and evidence pointers are restored; Git, files, commands, and external side
+  effects are not.
+
+Detailed status belongs in this README or an explicit status request, not in
+repeated lifecycle output.
+
 ## Create the first checkpoint
 
 In the new trusted thread, ask:
@@ -63,7 +78,7 @@ Confirm all of these before treating the setup as complete:
   `latestCheckpointStatus: verified`;
 - a new thread loads only the bounded, integrity-verified Task Frame.
 
-Preserve important checkpoint UUIDs. ContextGC `0.1.5` does not expose a public
+Preserve important checkpoint UUIDs. ContextGC `0.1.6` does not expose a public
 checkpoint-list command.
 
 On an empty store, the first writable user turn may request one bootstrap

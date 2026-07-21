@@ -68,16 +68,22 @@ The plugin combines a skill, MCP tools and trusted lifecycle hooks.
 - `PostToolUse` captures only cheap factual metadata and never calls an LLM.
 - `PreCompact` verifies that the latest TaskFrame matches its checkpoint
   manifest and content-addressed archive object before snapshotting it.
-- `PostCompact` records the trigger and measurement boundary.
+- `PostCompact` records the trigger and measurement boundary and emits one
+  bounded result notice.
 - `SessionStart` and `UserPromptSubmit` inject only a bounded TaskFrame.
 - `SessionStart` reports an empty-store condition only as a short UI message.
   The first writable `UserPromptSubmit` may request one checkpoint without
   exposing a storage path; `PostToolUse` is a once-per-turn fallback.
 - Plan mode emits a non-mutating defer notice and suppresses checkpoint
   reminders for that turn.
-- `Stop` may request at most one optimizer-plan/checkpoint continuation,
-  protected by a recursion guard. `HOLD` finishes without a checkpoint; invalid
-  output leaves the previous checkpoint intact.
+- `Stop` records bounded metadata but never requests a model continuation.
+  Tool-count and elapsed-time pressure are enforced only at the real
+  `PreCompact` boundary: if recent work is not represented by the verified
+  checkpoint, automatic compaction fails closed and requests one refresh.
+
+Every user-visible hook notice is limited to three lines and 240 characters.
+Healthy prompts, tools, and Stop events are silent. The full bounded Task Frame
+remains model context rather than a repeated user-facing transcript.
 
 Installing or enabling a plugin does not automatically trust its hooks. The
 user must inspect and trust the current hook definition in Codex.
@@ -147,6 +153,6 @@ OpenAI does not publish a deterministic token-to-credit conversion.
 | Empty store before automatic compact | Automatic compact remains blocked on every retry until checkpoint, snapshot, and hook-state persistence all verify |
 | Checkpoint request while in Plan mode | Mutation is deferred and reminders are suppressed for that turn |
 | Protected atom cannot fit budget | KEEP-all fail-closed result |
-| Repeated Stop hook | Recursion guard suppresses continuation |
+| Repeated Stop hook | Observability-only; never creates a continuation |
 | Pricing table missing | Token report and usage proxy remain; API-equivalent estimate omitted |
 | Native compaction cannot be actuated | Recommendation and safety checkpoint remain usable |

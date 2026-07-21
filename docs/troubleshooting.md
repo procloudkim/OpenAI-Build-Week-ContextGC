@@ -62,7 +62,7 @@ Expected observable: the JSON contains both `context-gc` and `ContextGC` skill
 metadata. This command is an experimental diagnostic surface, not a stable user
 API.
 
-If metadata is absent, confirm plugin version `0.1.5`, reinstall, and start a
+If metadata is absent, confirm plugin version `0.1.6`, reinstall, and start a
 new thread. Do not manually overwrite the installed cache.
 
 ### Reinstall fails with Windows `Access denied`
@@ -232,7 +232,7 @@ These commands do not delete checkpoints. Before deleting stored data:
    shared output;
 5. delete only that reviewed directory using your normal OS workflow.
 
-ContextGC intentionally has no recursive-delete command in release `0.1.5`.
+ContextGC intentionally has no recursive-delete command in release `0.1.6`.
 
 ## Escalation
 

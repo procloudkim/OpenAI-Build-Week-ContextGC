@@ -80,8 +80,8 @@ Restore가 Git, 파일, 명령 또는 외부 부작용까지 되돌린다고 주
 - `UserPromptSubmit`: bounded context와 bootstrap guidance 제공
 - `PostToolUse`: 지원되는 factual event 기록
 - `PreCompact`: 보호 경계 검증
-- `PostCompact`: compaction 완료 기록
-- `Stop`: 가역적 checkpoint 필요성 확인
+- `PostCompact`: compaction 완료 기록과 제한된 결과 알림
+- `Stop`: 추가 모델 턴 없이 메타데이터만 기록
 
 가장 중요한 동작은 fail-closed입니다. Checkpoint, snapshot, hook state가 모두
 검증될 때까지 automatic compaction은 중단됩니다.
@@ -109,6 +109,11 @@ encryption을 의미하지 않습니다.
 각 문제를 invariant와 regression test로 바꿨습니다. Codex가 새 immutable cache
 entry를 사용하도록 release version을 `0.1.5`로 올렸고, 최종 hook manifest는
 모든 compaction trigger를 unknown value에서 fail-closed하는 코드로 전달합니다.
+
+실제 terminal 사용에서 긴 Stop continuation이 정상 작업을 가리는 문제가 확인된
+뒤 `0.1.6` hotfix로 사람에게 보이는 interface를 줄였습니다. 정상 lifecycle은
+무음으로 바꾸고, 알림은 최대 3줄로 제한했으며, resume 온보딩 반복을 없애고,
+checkpoint freshness 검사를 실제 PreCompact 안전 경계로 옮겼습니다.
 
 ## 과장하지 않는 평가
 

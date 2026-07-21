@@ -86,8 +86,8 @@ Six Codex hooks form the control plane:
 - `UserPromptSubmit` provides bounded context and bootstrap guidance;
 - `PostToolUse` captures supported factual events;
 - `PreCompact` verifies the protection boundary;
-- `PostCompact` records completion; and
-- `Stop` checks whether a reversible checkpoint is due.
+- `PostCompact` records completion and reports a bounded result; and
+- `Stop` records metadata without forcing another model turn.
 
 The most important behavior is fail-closed: automatic compaction remains paused
 until the checkpoint, snapshot, and hook state all verify.
@@ -116,6 +116,12 @@ Each issue was converted into an invariant and a regression test. The release
 version moved to `0.1.5` so Codex would load a new immutable plugin cache entry.
 The final hook manifest routes every compaction trigger to code that fails
 closed on unknown values.
+
+Release `0.1.6` then tightened the human interface after real terminal use
+showed that a long Stop continuation could obscure normal work. Healthy
+lifecycle events became silent, user-visible notices were capped at three
+lines, resume stopped repeating onboarding, and checkpoint freshness moved to
+the actual PreCompact safety boundary.
 
 ## Evaluation without pretending
 

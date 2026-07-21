@@ -82,7 +82,7 @@ are still processed by that session's model.
 | Transcript schema drift | Version guard, structural validation, advisory-only fallback |
 | Archive tampering | SHA-256 verification on every rehydrate and restore |
 | Persisted prompt injection | Bounded fields, untrusted-data framing, no raw tool-output capture, and repository re-verification; semantic poisoning remains a documented residual risk |
-| Hook recursion | Per-session Stop guard and one-continuation ceiling |
+| Hook recursion | Stop is observability-only and never creates a continuation |
 | Context flooding | Hard byte/token bounds on injected TaskFrame and rehydration |
 | Store split or path injection | Installed-store inference, mutation denial on an unconfigured working-directory fallback, absolute-only advanced overrides, path-redacted errors, and opaque `storeId` output |
 | Personal data in Task Frames | Closed frame schema, repository-relative active files, safe evidence pointers, deterministic redaction heuristics, and an explicit residual-risk warning |

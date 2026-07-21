@@ -4,6 +4,27 @@ All notable ContextGC changes are recorded here. Dates use ISO 8601.
 
 ## Unreleased
 
+## [0.1.6] - 2026-07-21
+
+### Changed
+
+- Make ordinary `Stop`, prompt, and tool lifecycle events user-silent; checkpoint
+  freshness is now enforced only at the real `PreCompact` safety boundary.
+- Limit every user-visible hook notice to three lines and 240 characters. A
+  healthy compaction uses one line, while recovery and integrity failures remain
+  actionable without exposing identifiers or local paths.
+- Show the trust/README/Star onboarding once per installed version, keep later
+  fresh-session notices compact, and suppress onboarding on resume.
+- Report successful restore scope once: Task Frame metadata and evidence
+  pointers are restored, while Git, files, commands, and external side effects
+  are not.
+
+### Fixed
+
+- Remove the recurring long `Stop` continuation prompt that could add model
+  turns after six tool events even when observed telemetry was unavailable.
+- Remove repeated SessionStart and Stop status banners from the hook manifest.
+
 ## [0.1.5] - 2026-07-19
 
 ### Changed

@@ -23,14 +23,14 @@ Purpose: install both dependency trees without running package lifecycle
 scripts.
 
 ```powershell
-git clone https://github.com/procloudkim/OpenAI-Build-Week-ContextGC.git
+git clone https://github.com/procloudkim/OpenAI-Build-Week-ContextGC.git context-gc
 Set-Location context-gc
 npm ci --ignore-scripts
 npm --prefix site ci --ignore-scripts
 ```
 
 Expected observable: both commands finish with `found 0 vulnerabilities` for
-the lockfile state verified for release `0.1.5`. Treat a later audit result as a
+the lockfile state verified for release `0.1.6`. Treat a later audit result as a
 new finding rather than preserving this sentence indefinitely.
 
 Failure boundary: network access is required for the initial public clone and
@@ -173,7 +173,7 @@ For a new public repository:
 5. push only that branch to the public repository's `main`; and
 6. never push `--all`, `--mirror`, private tags, notes, or other local refs.
 
-The prepared branch name for this release is `public-release-v0.1.5`. Compare
+The prepared branch name for this release is `public-release-v0.1.6`. Compare
 its tree hash with `main` before every push. Repository visibility, anonymous
 clone, CI, and Devpost access remain external checks.
 

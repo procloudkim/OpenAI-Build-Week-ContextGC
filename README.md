@@ -44,7 +44,7 @@ measured reduction in live Codex credits.
    requires Node.js 22.13 or newer but no dependency installation or rebuild:
 
 ```powershell
-git clone https://github.com/procloudkim/OpenAI-Build-Week-ContextGC.git
+git clone https://github.com/procloudkim/OpenAI-Build-Week-ContextGC.git context-gc
 Set-Location context-gc
 node scripts/contextgc.bundle.mjs simulate
 ```
@@ -232,6 +232,22 @@ hooks. In normal installed use, users and agents omit `dataDir`; ContextGC
 infers its private local store, while hooks and tools expose only an opaque
 `storeId`. An absolute `dataDir` is an advanced override that must stay local
 and must never be pasted into prompts or reports.
+
+### Minimal notification policy
+
+ContextGC keeps normal work quiet. The first verified startup after trusting a
+new plugin version shows one three-line onboarding notice and a README link.
+Later fresh startups show a compact two-line wireframe; resume does not repeat
+onboarding. Ordinary prompts, tool calls, and `Stop` events are silent and never
+create a model continuation merely because a tool-count or clock threshold was
+crossed. A protected compaction reports one line. Integrity failures and an
+explicit restore report at most three lines and never include a checkpoint ID,
+store ID, session ID, or local path.
+
+The full Task Frame remains bounded model context rather than a user-facing
+status transcript. Native Codex summary contents are opaque to ContextGC;
+notifications report only the checkpoint, snapshot, and recovery state that the
+plugin can verify.
 
 An empty store is handled fail-closed. The first writable user turn may request
 one checkpoint without a path; Plan mode defers the mutation for that turn.

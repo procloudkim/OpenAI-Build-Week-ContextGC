@@ -61,6 +61,30 @@ test("SessionStart and UserPromptSubmit inject only the integrity-verified lates
   const sessionContext = sessionStart.output?.hookSpecificOutput?.additionalContext ?? "";
   assert.match(sessionContext, /contextgcStoreId:/u);
   assert.doesNotMatch(sessionContext, new RegExp(escapeRegExp(root), "iu"));
+  assert.match(sessionStart.output?.systemMessage ?? "", /Thanks for trusting ContextGC/u);
+  assert.match(sessionStart.output?.systemMessage ?? "", /github\.com\/procloudkim\/OpenAI-Build-Week-ContextGC/u);
+  assertNoticeBudget(sessionStart.output?.systemMessage);
+
+  const resume = await invokeHook(root, {
+    hook_event_name: "SessionStart",
+    session_id: "session-resume",
+    turn_id: "turn-resume",
+    cwd: root,
+    source: "resume",
+  });
+  assert.match(resume.output?.hookSpecificOutput?.additionalContext ?? "", /Resume the verified implementation/u);
+  assert.equal(resume.output?.systemMessage, undefined);
+
+  const laterStartup = await invokeHook(root, {
+    hook_event_name: "SessionStart",
+    session_id: "session-later-startup",
+    turn_id: "turn-later-startup",
+    cwd: root,
+    source: "startup",
+  });
+  assert.match(laterStartup.output?.systemMessage ?? "", /ContextGC active/u);
+  assert.doesNotMatch(laterStartup.output?.systemMessage ?? "", /Star|Thanks for trusting/iu);
+  assertNoticeBudget(laterStartup.output?.systemMessage);
 
   const promptSubmit = await invokeHook(root, {
     hook_event_name: "UserPromptSubmit",
@@ -90,7 +114,8 @@ test("empty store issues one writable-turn checkpoint reminder and recovers auto
     source: "startup",
   });
   assert.equal(sessionStart.output?.hookSpecificOutput, undefined);
-  assert.match(sessionStart.output?.systemMessage ?? "", /no integrity-verified checkpoint/iu);
+  assert.match(sessionStart.output?.systemMessage ?? "", /No verified checkpoint/iu);
+  assertNoticeBudget(sessionStart.output?.systemMessage);
   assert.doesNotMatch(sessionStart.stdout, new RegExp(escapeRegExp(root), "iu"));
 
   const promptSubmit = await invokeHook(root, {
@@ -106,6 +131,7 @@ test("empty store issues one writable-turn checkpoint reminder and recovers auto
     promptSubmit.output?.hookSpecificOutput?.additionalContext ?? "",
     /checkpoint status: MISSING/u,
   );
+  assertNoticeBudget(promptSubmit.output?.hookSpecificOutput?.additionalContext);
   assert.doesNotMatch(promptSubmit.stdout, new RegExp(escapeRegExp(root), "iu"));
   assert.match(promptSubmit.stdout, /without dataDir/iu);
 
@@ -168,7 +194,9 @@ test("empty store issues one writable-turn checkpoint reminder and recovers auto
   };
   const blocked = await invokeHook(root, preCompactInput);
   assert.equal(blocked.output?.continue, false);
-  assert.match(blocked.output?.stopReason ?? "", /diagnostic: MISSING/u);
+  assert.match(blocked.output?.stopReason ?? "", /MISSING/u);
+  assertNoticeBudget(blocked.output?.stopReason);
+  assertNoticeBudget(blocked.output?.systemMessage);
   assert.doesNotMatch(blocked.stdout, new RegExp(escapeRegExp(root), "iu"));
 
   const runtime = new ContextGcRuntime({ dataDir: root });
@@ -225,6 +253,7 @@ test("PostToolUse supplies one fallback bootstrap reminder when no prompt hook r
   assert.equal(first.output, null);
   assert.equal(second.output?.hookSpecificOutput?.hookEventName, "PostToolUse");
   assert.match(second.output?.hookSpecificOutput?.additionalContext ?? "", /contextgc_checkpoint/iu);
+  assertNoticeBudget(second.output?.hookSpecificOutput?.additionalContext);
   assert.doesNotMatch(second.stdout, new RegExp(escapeRegExp(root), "iu"));
   assert.equal(third.output, null);
 });
@@ -243,6 +272,7 @@ test("Plan mode reports deferred protection without requesting a mutation", asyn
   const context = prompt.output?.hookSpecificOutput?.additionalContext ?? "";
   assert.match(context, /Plan-mode turn/iu);
   assert.doesNotMatch(context, /call contextgc_checkpoint/iu);
+  assertNoticeBudget(context);
 
   for (let index = 0; index < 3; index += 1) {
     const tool = await invokeHook(root, {
@@ -271,6 +301,7 @@ test("Plan mode reports deferred protection without requesting a mutation", asyn
     writablePrompt.output?.hookSpecificOutput?.additionalContext ?? "",
     /contextgc_checkpoint/iu,
   );
+  assertNoticeBudget(writablePrompt.output?.hookSpecificOutput?.additionalContext);
 });
 
 test("Task Frame injection quotes untrusted multiline values without creating instruction headings", async () => {
@@ -313,7 +344,8 @@ test("tampered mirror is rejected and automatic PreCompact retries stay blocked 
   });
   assert.equal(start.output?.continue, true);
   assert.equal(start.output?.hookSpecificOutput, undefined);
-  assert.match(start.output?.systemMessage ?? "", /no integrity-verified checkpoint/iu);
+  assert.match(start.output?.systemMessage ?? "", /recovery is unverified/iu);
+  assertNoticeBudget(start.output?.systemMessage);
 
   const prompt = await invokeHook(root, {
     hook_event_name: "UserPromptSubmit",
@@ -400,7 +432,7 @@ test("manifest hash and archive-object corruption prevent hook injection", async
   assert.match(invalidArchive.output?.systemMessage ?? "", /invalid or legacy checkpoint/iu);
 });
 
-test("PostToolUse, PostCompact, and Stop preserve metadata boundaries and one-shot planning", async () => {
+test("PostToolUse, PostCompact, and Stop keep healthy turns silent and notifications bounded", async () => {
   const root = await temporaryRoot();
   const runtime = new ContextGcRuntime({ dataDir: root });
   await runtime.createCheckpoint({ goal: "Route an optimizer decision safely" });
@@ -423,7 +455,9 @@ test("PostToolUse, PostCompact, and Stop preserve metadata boundaries and one-sh
     cwd: root,
     trigger: "manual",
   });
-  assert.equal(postCompact.output, null);
+  assert.match(postCompact.output?.systemMessage ?? "", /protected compaction complete/iu);
+  assert.match(postCompact.output?.systemMessage ?? "", /native summary opaque/iu);
+  assertNoticeBudget(postCompact.output?.systemMessage);
 
   const secretMarker = "RAW_TOOL_VALUE_MUST_NOT_PERSIST";
   for (let index = 0; index < 6; index += 1) {
@@ -450,12 +484,7 @@ test("PostToolUse, PostCompact, and Stop preserve metadata boundaries and one-sh
     last_assistant_message: "Implementation complete.",
   };
   const stop = await invokeHook(root, stopInput);
-  assert.equal(stop.output?.decision, "block");
-  assert.match(stop.output?.reason ?? "", /contextgc_plan/u);
-  assert.match(stop.output?.reason ?? "", /PREPARE/u);
-  assert.match(stop.output?.reason ?? "", /On HOLD, finish without checkpointing/u);
-  assert.match(stop.output?.reason ?? "", /never native compaction/u);
-  assert.doesNotMatch(stop.output?.reason ?? "", new RegExp(escapeRegExp(root), "iu"));
+  assert.equal(stop.output, null);
 
   const recursiveStop = await invokeHook(root, { ...stopInput, stop_hook_active: true });
   assert.equal(recursiveStop.output, null);
@@ -467,6 +496,84 @@ test("PostToolUse, PostCompact, and Stop preserve metadata boundaries and one-sh
   assert.match(ledger, /"type":"hook\.post-tool-use"/u);
   assert.match(ledger, /"type":"hook\.post-compact"/u);
   assert.match(ledger, /"type":"hook\.stop"/u);
+});
+
+test("a successful restore reports its bounded recovery scope without identifiers", async () => {
+  const root = await temporaryRoot();
+  const runtime = new ContextGcRuntime({ dataDir: root });
+  const checkpoint = await runtime.createCheckpoint({ goal: "Restore this verified frame" });
+  await runtime.createCheckpoint({ goal: "A newer frame that will be replaced" });
+  const actualRestore = await runtime.restoreCheckpoint(checkpoint.manifest.checkpointId);
+
+  const restored = await invokeHook(root, {
+    hook_event_name: "PostToolUse",
+    session_id: "restore-session",
+    turn_id: "restore-turn",
+    cwd: root,
+    tool_name: "mcp__context_gc__contextgc_restore",
+    tool_use_id: "restore-tool",
+    tool_input: {},
+    tool_response: {
+      structuredContent: {
+        manifest: actualRestore.manifest,
+        storeId: storeIdForRoot(root),
+        dataDirSource: "plugin_data_inferred",
+      },
+    },
+  });
+
+  const notice = restored.output?.systemMessage ?? "";
+  assert.match(notice, /restore verified/iu);
+  assert.match(notice, /Task Frame and evidence pointers/iu);
+  assert.match(notice, /Not restored: Git, files, commands, or external side effects/iu);
+  assert.doesNotMatch(notice, new RegExp(checkpoint.manifest.checkpointId, "iu"));
+  assert.doesNotMatch(notice, new RegExp(escapeRegExp(root), "iu"));
+  assertNoticeBudget(notice);
+});
+
+test("automatic PreCompact blocks only at the safety boundary when recent work outgrows the checkpoint", async () => {
+  const root = await temporaryRoot();
+  const runtime = new ContextGcRuntime({ dataDir: root });
+  await runtime.createCheckpoint({ goal: "Protect work before native compaction" });
+  const sessionId = "stale-checkpoint-session";
+
+  for (let index = 0; index < 6; index += 1) {
+    const tool = await invokeHook(root, {
+      hook_event_name: "PostToolUse",
+      session_id: sessionId,
+      turn_id: `work-turn-${index}`,
+      cwd: root,
+      tool_name: "Read",
+      tool_use_id: `work-tool-${index}`,
+      tool_input: {},
+      tool_response: { status: "ok" },
+    });
+    assert.equal(tool.output, null);
+  }
+
+  const ordinaryStop = await invokeHook(root, {
+    hook_event_name: "Stop",
+    session_id: sessionId,
+    turn_id: "ordinary-stop",
+    cwd: root,
+    permission_mode: "default",
+    stop_hook_active: false,
+    last_assistant_message: "Continue later.",
+  });
+  assert.equal(ordinaryStop.output, null);
+
+  const preCompact = await invokeHook(root, {
+    hook_event_name: "PreCompact",
+    session_id: sessionId,
+    turn_id: "actual-auto-compact",
+    cwd: root,
+    trigger: "auto",
+  });
+  assert.equal(preCompact.output?.continue, false);
+  assert.match(preCompact.output?.stopReason ?? "", /STALE/u);
+  assert.match(preCompact.output?.systemMessage ?? "", /Create or refresh one verified checkpoint/iu);
+  assertNoticeBudget(preCompact.output?.stopReason);
+  assertNoticeBudget(preCompact.output?.systemMessage);
 });
 
 test("automatic PreCompact fails closed when snapshot or hook-state storage is unavailable", async () => {
@@ -482,7 +589,9 @@ test("automatic PreCompact fails closed when snapshot or hook-state storage is u
     trigger: "auto",
   });
   assert.equal(snapshotFailure.output?.continue, false);
-  assert.match(snapshotFailure.output?.stopReason ?? "", /integrity were not all established/iu);
+  assert.match(snapshotFailure.output?.stopReason ?? "", /automatic compaction paused/iu);
+  assertNoticeBudget(snapshotFailure.output?.stopReason);
+  assertNoticeBudget(snapshotFailure.output?.systemMessage);
 
   const stateRoot = await temporaryRoot();
   const stateRuntime = new ContextGcRuntime({ dataDir: stateRoot });
@@ -496,7 +605,9 @@ test("automatic PreCompact fails closed when snapshot or hook-state storage is u
     trigger: "auto",
   });
   assert.equal(stateFailure.output?.continue, false);
-  assert.match(stateFailure.output?.systemMessage ?? "", /guard could not be persisted/iu);
+  assert.match(stateFailure.output?.systemMessage ?? "", /hook state could not be persisted/iu);
+  assertNoticeBudget(stateFailure.output?.stopReason);
+  assertNoticeBudget(stateFailure.output?.systemMessage);
 });
 
 test("an unrecognized PreCompact trigger fails closed even with a verified checkpoint", async () => {
@@ -513,22 +624,31 @@ test("an unrecognized PreCompact trigger fails closed even with a verified check
   });
   assert.equal(result.output?.continue, false);
   assert.match(result.output?.stopReason ?? "", /PROTECTION_INCOMPLETE/u);
+  assertNoticeBudget(result.output?.stopReason);
+  assertNoticeBudget(result.output?.systemMessage);
 });
 
 test("the hook manifest routes every PreCompact trigger through the fail-closed script", async () => {
   const manifest = JSON.parse(await readFile(resolve(process.cwd(), "hooks", "hooks.json"), "utf8")) as {
     hooks?: {
-      PreCompact?: Array<{ matcher?: string; hooks?: Array<{ command?: string }> }>;
+      SessionStart?: Array<{ hooks?: Array<{ statusMessage?: string }> }>;
+      PreCompact?: Array<{ matcher?: string; hooks?: Array<{ command?: string; statusMessage?: string }> }>;
       PostCompact?: Array<{ matcher?: string }>;
+      Stop?: Array<{ hooks?: Array<{ statusMessage?: string }> }>;
     };
   };
+  const sessionStart = manifest.hooks?.SessionStart ?? [];
   const preCompact = manifest.hooks?.PreCompact ?? [];
   const postCompact = manifest.hooks?.PostCompact ?? [];
+  const stop = manifest.hooks?.Stop ?? [];
 
   assert.equal(preCompact.length, 1);
   assert.equal(preCompact[0]?.matcher, "*");
   assert.match(preCompact[0]?.hooks?.[0]?.command ?? "", /run-hook\.mjs/u);
+  assert.equal(preCompact[0]?.hooks?.[0]?.statusMessage, "ContextGC: verifying compaction protection");
   assert.equal(postCompact[0]?.matcher, "*");
+  assert.equal(sessionStart[0]?.hooks?.[0]?.statusMessage, undefined);
+  assert.equal(stop[0]?.hooks?.[0]?.statusMessage, undefined);
 });
 
 test("hook state load is bounded and discards unknown persisted fields before rewrite", async () => {
@@ -623,7 +743,9 @@ test("automatic PreCompact returns an explicit block response after an unexpecte
   );
 
   assert.equal(failure.output?.continue, false);
-  assert.match(failure.output?.stopReason ?? "", /paused automatic compaction/iu);
+  assert.match(failure.output?.stopReason ?? "", /automatic compaction paused/iu);
+  assertNoticeBudget(failure.output?.stopReason);
+  assertNoticeBudget(failure.output?.systemMessage);
   assert.match(failure.stderr, /failed closed/iu);
   const ledger = await readFile(resolve(root, "events.jsonl"), "utf8");
   assert.match(ledger, /"type":"hook\.error"/u);
@@ -640,7 +762,8 @@ async function invokeHook(
   input: object,
   nodeArguments: readonly string[] = [],
 ): Promise<HookResult> {
-  const child = spawn(process.execPath, [...nodeArguments, resolve(process.cwd(), "hooks", "run-hook.mjs")], {
+  const hookScript = process.env.CONTEXTGC_HOOK_SCRIPT ?? resolve(process.cwd(), "hooks", "run-hook.mjs");
+  const child = spawn(process.execPath, [...nodeArguments, hookScript], {
     env: { ...process.env, PLUGIN_DATA: root, CONTEXTGC_HOME: "" },
     stdio: ["pipe", "pipe", "pipe"],
   });
@@ -678,4 +801,11 @@ function storeIdForRoot(root: string): string {
 
 function escapeRegExp(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
+}
+
+function assertNoticeBudget(value: string | undefined): void {
+  assert.notEqual(value, undefined);
+  const notice = value ?? "";
+  assert.ok(notice.length <= 240, `notice exceeded 240 characters: ${notice.length}`);
+  assert.ok(notice.split(/\r?\n/u).length <= 3, "notice exceeded three lines");
 }
