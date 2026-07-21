@@ -1,0 +1,107 @@
+{
+  "schemaVersion": 1,
+  "id": "exact-config-migration",
+  "title": "Exact Config Migration",
+  "description": "Migrate a Node workspace while preserving exact early configuration facts and a protected release workflow.",
+  "synthetic": true,
+  "contextBudgetTokens": 12000,
+  "manualCheckpointTurns": ["t05", "t09"],
+  "turns": [
+    {
+      "id": "t01",
+      "phase": "explore",
+      "newContextTokens": 1180,
+      "outputTokens": 260,
+      "cacheShare": 0.18,
+      "facts": [
+        {"id": "node_runtime", "kind": "constraint", "value": "22.13.0", "tokens": 42, "importance": 10, "protected": true, "exact": true},
+        {"id": "package_manager", "kind": "constraint", "value": "npm@10.9.2", "tokens": 38, "importance": 10, "protected": true, "exact": true}
+      ]
+    },
+    {
+      "id": "t02",
+      "phase": "explore",
+      "newContextTokens": 970,
+      "outputTokens": 210,
+      "cacheShare": 0.72,
+      "facts": [
+        {"id": "registry_url", "kind": "constraint", "value": "https://registry.npmjs.org/", "tokens": 54, "importance": 9, "protected": true, "exact": true}
+      ]
+    },
+    {
+      "id": "t03",
+      "phase": "plan",
+      "newContextTokens": 1320,
+      "outputTokens": 300,
+      "cacheShare": 0.78,
+      "facts": [
+        {"id": "preserve_release_workflow", "kind": "constraint", "value": "Do not modify .github/workflows/release.yml", "tokens": 66, "importance": 10, "protected": true, "exact": false}
+      ]
+    },
+    {
+      "id": "t04",
+      "phase": "plan",
+      "newContextTokens": 820,
+      "outputTokens": 250,
+      "cacheShare": 0.82,
+      "facts": [
+        {"id": "build_command", "kind": "decision", "value": "npm run verify", "tokens": 44, "importance": 8, "protected": false, "exact": true}
+      ]
+    },
+    {
+      "id": "t05",
+      "phase": "implement",
+      "newContextTokens": 1510,
+      "outputTokens": 380,
+      "cacheShare": 0.84,
+      "facts": [
+        {"id": "migration_scope", "kind": "goal", "value": "package.json, lockfile, and runtime config only", "tokens": 62, "importance": 8, "protected": false, "exact": false}
+      ]
+    },
+    {
+      "id": "t06",
+      "phase": "implement",
+      "newContextTokens": 1230,
+      "outputTokens": 330,
+      "cacheShare": 0.76,
+      "facts": [
+        {"id": "install_log_noise", "kind": "transient", "value": "Optional peer warnings from unrelated packages", "tokens": 120, "importance": 1, "protected": false, "exact": false}
+      ]
+    },
+    {
+      "id": "t07",
+      "phase": "implement",
+      "newContextTokens": 940,
+      "outputTokens": 270,
+      "cacheShare": 0.8,
+      "usesFacts": ["node_runtime", "package_manager"]
+    },
+    {
+      "id": "t08",
+      "phase": "verify",
+      "newContextTokens": 1120,
+      "outputTokens": 290,
+      "cacheShare": 0.83,
+      "usesFacts": ["registry_url", "build_command"]
+    },
+    {
+      "id": "t09",
+      "phase": "verify",
+      "newContextTokens": 880,
+      "outputTokens": 240,
+      "cacheShare": 0.79,
+      "usesFacts": ["preserve_release_workflow"],
+      "proposedChanges": [
+        {"target": ".github/workflows/release.yml", "guardFactId": "preserve_release_workflow"}
+      ]
+    },
+    {
+      "id": "t10",
+      "phase": "release",
+      "newContextTokens": 720,
+      "outputTokens": 220,
+      "cacheShare": 0.86,
+      "usesFacts": ["node_runtime", "package_manager", "registry_url", "build_command"]
+    }
+  ]
+}

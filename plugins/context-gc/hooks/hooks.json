@@ -1,0 +1,84 @@
+{
+  "description": "ContextGC lifecycle capture, bounded Task Frame injection, and reversible compaction guards.",
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume|clear|compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${PLUGIN_ROOT}/hooks/run-hook.mjs\"",
+            "commandWindows": "node --input-type=module -e \"const{pathToFileURL}=await import('node:url');await import(pathToFileURL(process.env.PLUGIN_ROOT+'\\\\hooks\\\\run-hook.mjs').href)\"",
+            "timeout": 5,
+            "statusMessage": "Loading the protected ContextGC task frame"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${PLUGIN_ROOT}/hooks/run-hook.mjs\"",
+            "commandWindows": "node --input-type=module -e \"const{pathToFileURL}=await import('node:url');await import(pathToFileURL(process.env.PLUGIN_ROOT+'\\\\hooks\\\\run-hook.mjs').href)\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${PLUGIN_ROOT}/hooks/run-hook.mjs\"",
+            "commandWindows": "node --input-type=module -e \"const{pathToFileURL}=await import('node:url');await import(pathToFileURL(process.env.PLUGIN_ROOT+'\\\\hooks\\\\run-hook.mjs').href)\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${PLUGIN_ROOT}/hooks/run-hook.mjs\"",
+            "commandWindows": "node --input-type=module -e \"const{pathToFileURL}=await import('node:url');await import(pathToFileURL(process.env.PLUGIN_ROOT+'\\\\hooks\\\\run-hook.mjs').href)\"",
+            "timeout": 5,
+            "statusMessage": "Protecting the latest ContextGC checkpoint"
+          }
+        ]
+      }
+    ],
+    "PostCompact": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${PLUGIN_ROOT}/hooks/run-hook.mjs\"",
+            "commandWindows": "node --input-type=module -e \"const{pathToFileURL}=await import('node:url');await import(pathToFileURL(process.env.PLUGIN_ROOT+'\\\\hooks\\\\run-hook.mjs').href)\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${PLUGIN_ROOT}/hooks/run-hook.mjs\"",
+            "commandWindows": "node --input-type=module -e \"const{pathToFileURL}=await import('node:url');await import(pathToFileURL(process.env.PLUGIN_ROOT+'\\\\hooks\\\\run-hook.mjs').href)\"",
+            "timeout": 5,
+            "statusMessage": "Checking whether a reversible checkpoint is due"
+          }
+        ]
+      }
+    ]
+  }
+}

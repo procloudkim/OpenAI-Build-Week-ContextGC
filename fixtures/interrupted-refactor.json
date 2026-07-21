@@ -1,0 +1,116 @@
+{
+  "schemaVersion": 1,
+  "id": "interrupted-refactor",
+  "title": "Interrupted Refactor",
+  "description": "Resume a client refactor after an unrelated interruption while preserving a public API compatibility contract.",
+  "synthetic": true,
+  "contextBudgetTokens": 12000,
+  "manualCheckpointTurns": ["t05", "t09"],
+  "turns": [
+    {
+      "id": "t01",
+      "phase": "explore",
+      "newContextTokens": 1150,
+      "outputTokens": 250,
+      "cacheShare": 0.2,
+      "facts": [
+        {"id": "public_signature", "kind": "constraint", "value": "createClient(options: ClientOptions): Client", "tokens": 58, "importance": 10, "protected": true, "exact": true},
+        {"id": "compatibility", "kind": "constraint", "value": "Keep the legacy import path for one release", "tokens": 62, "importance": 10, "protected": true, "exact": false}
+      ]
+    },
+    {
+      "id": "t02",
+      "phase": "plan",
+      "newContextTokens": 980,
+      "outputTokens": 260,
+      "cacheShare": 0.72,
+      "facts": [
+        {"id": "adapter_decision", "kind": "decision", "value": "Use an adapter instead of changing callers", "tokens": 64, "importance": 9, "protected": false, "exact": false},
+        {"id": "legacy_path", "kind": "constraint", "value": "src/legacy/client.ts", "tokens": 42, "importance": 9, "protected": true, "exact": true}
+      ]
+    },
+    {
+      "id": "t03",
+      "phase": "implement",
+      "newContextTokens": 1370,
+      "outputTokens": 330,
+      "cacheShare": 0.78,
+      "facts": [
+        {"id": "target_module", "kind": "goal", "value": "src/client/create-client.ts", "tokens": 48, "importance": 8, "protected": false, "exact": true}
+      ]
+    },
+    {
+      "id": "t04",
+      "phase": "implement",
+      "newContextTokens": 1220,
+      "outputTokens": 310,
+      "cacheShare": 0.81,
+      "facts": [
+        {"id": "unit_test", "kind": "evidence", "value": "tests/client/create-client.test.ts", "tokens": 50, "importance": 8, "protected": false, "exact": true}
+      ]
+    },
+    {
+      "id": "t05",
+      "phase": "explore",
+      "newContextTokens": 1610,
+      "outputTokens": 360,
+      "cacheShare": 0.7,
+      "facts": [
+        {"id": "interruption_noise", "kind": "transient", "value": "Unrelated request to inspect CI artifact retention", "tokens": 220, "importance": 1, "protected": false, "exact": false}
+      ]
+    },
+    {
+      "id": "t06",
+      "phase": "explore",
+      "newContextTokens": 1480,
+      "outputTokens": 320,
+      "cacheShare": 0.76,
+      "facts": [
+        {"id": "ci_noise", "kind": "transient", "value": "Artifact inventory unrelated to the client refactor", "tokens": 190, "importance": 1, "protected": false, "exact": false}
+      ]
+    },
+    {
+      "id": "t07",
+      "phase": "implement",
+      "newContextTokens": 990,
+      "outputTokens": 280,
+      "cacheShare": 0.8,
+      "usesFacts": ["adapter_decision", "target_module", "public_signature"]
+    },
+    {
+      "id": "t08",
+      "phase": "implement",
+      "newContextTokens": 1110,
+      "outputTokens": 300,
+      "cacheShare": 0.83,
+      "usesFacts": ["compatibility", "legacy_path"],
+      "proposedChanges": [
+        {"target": "src/legacy/client.ts", "guardFactId": "compatibility"}
+      ]
+    },
+    {
+      "id": "t09",
+      "phase": "verify",
+      "newContextTokens": 870,
+      "outputTokens": 240,
+      "cacheShare": 0.82,
+      "usesFacts": ["unit_test", "public_signature"]
+    },
+    {
+      "id": "t10",
+      "phase": "verify",
+      "newContextTokens": 760,
+      "outputTokens": 220,
+      "cacheShare": 0.86,
+      "usesFacts": ["legacy_path", "adapter_decision"]
+    },
+    {
+      "id": "t11",
+      "phase": "release",
+      "newContextTokens": 690,
+      "outputTokens": 200,
+      "cacheShare": 0.88,
+      "usesFacts": ["public_signature", "compatibility", "target_module", "unit_test"]
+    }
+  ]
+}

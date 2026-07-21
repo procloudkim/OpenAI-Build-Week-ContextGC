@@ -1,0 +1,37 @@
+name: Feature request
+description: Propose a bounded ContextGC improvement
+title: "feature: "
+labels: [enhancement]
+body:
+  - type: textarea
+    id: job
+    attributes:
+      label: User job and current friction
+      description: Describe the task and the observable problem, not only a solution name.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior
+    validations:
+      required: true
+
+  - type: textarea
+    id: done
+    attributes:
+      label: Done-when and evaluator
+      description: What result, metric, or falsifying test would justify the change?
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: boundaries
+    attributes:
+      label: Boundaries considered
+      options:
+        - label: Reversibility and recovery
+        - label: Secret and prompt-injection handling
+        - label: Native-compaction claim boundary
+        - label: Token/cache/credit measurement boundary

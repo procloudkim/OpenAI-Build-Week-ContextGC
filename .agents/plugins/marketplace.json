@@ -1,0 +1,20 @@
+{
+  "name": "context-gc-local",
+  "interface": {
+    "displayName": "ContextGC Local"
+  },
+  "plugins": [
+    {
+      "name": "context-gc",
+      "source": {
+        "source": "local",
+        "path": "./plugins/context-gc"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Developer Tools"
+    }
+  ]
+}

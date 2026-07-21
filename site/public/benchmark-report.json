@@ -1,0 +1,2382 @@
+{
+  "schemaVersion": 1,
+  "benchmarkVersion": "contextgc-synthetic-v1",
+  "scope": "deterministic-synthetic-policy-simulation",
+  "primaryMetric": "UPVS",
+  "usageProxyDefinition": {
+    "id": "neutral-v1",
+    "unit": "weighted-token-units",
+    "weights": {
+      "uncachedInputWeight": 1,
+      "cachedInputWeight": 1,
+      "cacheWriteInputWeight": 1,
+      "outputWeight": 1
+    },
+    "codexCredits": null,
+    "estimatedApiEquivalentUsd": null,
+    "limitation": "The proxy sums non-overlapping token categories with neutral weights. It is not a ChatGPT/Codex bill, credit estimate, or model-quality measurement."
+  },
+  "codexCredits": null,
+  "liveCodexProof": false,
+  "apiCallsMade": 0,
+  "leakageControls": [
+    "Hidden oracle files are held outside every policy input and passed only to the deterministic scorer after replay.",
+    "Policy decisions receive fixture traces but never oracle expectations or scorer output.",
+    "The scorer is deterministic and does not use an LLM or model self-judge.",
+    "Fixture and oracle hashes freeze the evaluated collection recipe.",
+    "A protected-fact corruption control must be rejected for every fixture.",
+    "Synthetic results are explicitly barred from claims about live Codex behavior."
+  ],
+  "limitations": [
+    "All fixtures are synthetic and authored with their deterministic oracles.",
+    "UPVS is a neutral token-volume proxy; cached input is separated from uncached input but carries the same default weight.",
+    "Compaction and checkpoint overheads are fixed simulator assumptions, not observed Codex telemetry.",
+    "Archived facts require a bounded per-turn retrieval; the negative control proves a missing critical fact fails at its required use boundary.",
+    "The three configured policies are all reversible and pass these authored mechanics; broader task quality is not modeled.",
+    "No API calls, live Codex sessions, human quality judges, or billing data are used.",
+    "The benchmark supports deterministic policy regression testing, not statistical generalization."
+  ],
+  "fixtures": [
+    {
+      "id": "exact-config-migration",
+      "title": "Exact Config Migration",
+      "turnCount": 10,
+      "fixtureHash": "3a0a3f4a1da2c27c00dee2cb8ec8f4de2982243cca94076c4d5fb4ea3d8f6f77",
+      "oracleHash": "22cf2a5c1832c96e0c9532520d4bc633ac535d76401e0d9ae9ab3f284904f70c"
+    },
+    {
+      "id": "interrupted-refactor",
+      "title": "Interrupted Refactor",
+      "turnCount": 11,
+      "fixtureHash": "be1299a59ef906e360e8707b43c70c235421a647fa20ba15557190b93c7c548e",
+      "oracleHash": "fc4a7355cd7093849368e7beaba0c1698f8e026d332c333048187370372ce06b"
+    },
+    {
+      "id": "noisy-incident-debug",
+      "title": "Noisy Incident Debug",
+      "turnCount": 12,
+      "fixtureHash": "80cad81c54de575b6f95e54ea741a850816495217d9f3b7d8b0bb2f3f4cf4223",
+      "oracleHash": "8cdecb98789e2090e1a73e145e776eb9c4e3461e9f655bf0cd22ad6620890e58"
+    }
+  ],
+  "runs": [
+    {
+      "fixtureId": "exact-config-migration",
+      "policy": "M_MANUAL",
+      "turnsProcessed": 10,
+      "usage": {
+        "uncachedInputTokens": 23082,
+        "cachedInputTokens": 23724,
+        "cacheWriteInputTokens": 0,
+        "outputTokens": 3110,
+        "usageProxy": 49916
+      },
+      "compactions": [
+        {
+          "turnId": "t05",
+          "trigger": "frozen-manual-schedule",
+          "activeTokensBefore": 7200,
+          "activeTokensAfter": 2592,
+          "actions": {
+            "KEEP": 4,
+            "SUMMARIZE": 1,
+            "EXTERNALIZE": 1
+          },
+          "coreOptimizerUsed": false
+        },
+        {
+          "turnId": "t09",
+          "trigger": "frozen-manual-schedule",
+          "activeTokensBefore": 7936,
+          "activeTokensAfter": 2856,
+          "actions": {
+            "KEEP": 4,
+            "SUMMARIZE": 1,
+            "EXTERNALIZE": 2
+          },
+          "coreOptimizerUsed": false
+        }
+      ],
+      "rehydrations": 2,
+      "rollbackAvailable": true,
+      "manualInterventions": 2,
+      "forbiddenChanges": [],
+      "factUses": [
+        {
+          "turnId": "t07",
+          "factId": "node_runtime",
+          "available": true,
+          "actualValue": "22.13.0",
+          "protected": true,
+          "exact": true,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "active",
+          "rehydrated": false,
+          "failureReason": null
+        },
+        {
+          "turnId": "t07",
+          "factId": "package_manager",
+          "available": true,
+          "actualValue": "npm@10.9.2",
+          "protected": true,
+          "exact": true,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "active",
+          "rehydrated": false,
+          "failureReason": null
+        },
+        {
+          "turnId": "t08",
+          "factId": "registry_url",
+          "available": true,
+          "actualValue": "https://registry.npmjs.org/",
+          "protected": true,
+          "exact": true,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "active",
+          "rehydrated": false,
+          "failureReason": null
+        },
+        {
+          "turnId": "t08",
+          "factId": "build_command",
+          "available": true,
+          "actualValue": "npm run verify",
+          "protected": false,
+          "exact": true,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "archive",
+          "rehydrated": true,
+          "failureReason": null
+        },
+        {
+          "turnId": "t09",
+          "factId": "preserve_release_workflow",
+          "available": true,
+          "actualValue": "Do not modify .github/workflows/release.yml",
+          "protected": true,
+          "exact": false,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "active",
+          "rehydrated": false,
+          "failureReason": null
+        },
+        {
+          "turnId": "t10",
+          "factId": "node_runtime",
+          "available": true,
+          "actualValue": "22.13.0",
+          "protected": true,
+          "exact": true,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "active",
+          "rehydrated": false,
+          "failureReason": null
+        },
+        {
+          "turnId": "t10",
+          "factId": "package_manager",
+          "available": true,
+          "actualValue": "npm@10.9.2",
+          "protected": true,
+          "exact": true,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "active",
+          "rehydrated": false,
+          "failureReason": null
+        },
+        {
+          "turnId": "t10",
+          "factId": "registry_url",
+          "available": true,
+          "actualValue": "https://registry.npmjs.org/",
+          "protected": true,
+          "exact": true,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "active",
+          "rehydrated": false,
+          "failureReason": null
+        },
+        {
+          "turnId": "t10",
+          "factId": "build_command",
+          "available": true,
+          "actualValue": "npm run verify",
+          "protected": false,
+          "exact": true,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "archive",
+          "rehydrated": true,
+          "failureReason": null
+        }
+      ],
+      "uncompressedContextTokens": 13440,
+      "finalActiveTokens": 3840,
+      "verifiedSuccess": true,
+      "oracleChecks": [
+        {
+          "id": "node_runtime",
+          "turnId": "t10",
+          "pass": true,
+          "expected": "22.13.0",
+          "actual": "22.13.0",
+          "exactPreserved": true,
+          "protected": true
+        },
+        {
+          "id": "package_manager",
+          "turnId": "t10",
+          "pass": true,
+          "expected": "npm@10.9.2",
+          "actual": "npm@10.9.2",
+          "exactPreserved": true,
+          "protected": true
+        },
+        {
+          "id": "registry_url",
+          "turnId": "t10",
+          "pass": true,
+          "expected": "https://registry.npmjs.org/",
+          "actual": "https://registry.npmjs.org/",
+          "exactPreserved": true,
+          "protected": true
+        },
+        {
+          "id": "build_command",
+          "turnId": "t10",
+          "pass": true,
+          "expected": "npm run verify",
+          "actual": "npm run verify",
+          "exactPreserved": true,
+          "protected": false
+        },
+        {
+          "id": "preserve_release_workflow",
+          "turnId": "t09",
+          "pass": true,
+          "expected": "Do not modify .github/workflows/release.yml",
+          "actual": "Do not modify .github/workflows/release.yml",
+          "exactPreserved": true,
+          "protected": true
+        }
+      ],
+      "forbiddenChangeChecksPassed": true,
+      "criticalRetentionRate": 1,
+      "exactRetentionRate": 1,
+      "cacheHitRate": 0.506858,
+      "compressionRatio": 0.714286,
+      "simulatedEvaluationSteps": 14
+    },
+    {
+      "fixtureId": "exact-config-migration",
+      "policy": "F_FIXED",
+      "turnsProcessed": 10,
+      "usage": {
+        "uncachedInputTokens": 23755,
+        "cachedInputTokens": 31664,
+        "cacheWriteInputTokens": 0,
+        "outputTokens": 2930,
+        "usageProxy": 58349
+      },
+      "compactions": [
+        {
+          "turnId": "t07",
+          "trigger": "fixed-75-percent-threshold",
+          "activeTokensBefore": 9970,
+          "activeTokensAfter": 3589,
+          "actions": {
+            "KEEP": 4,
+            "SUMMARIZE": 1,
+            "EXTERNALIZE": 2
+          },
+          "coreOptimizerUsed": false
+        }
+      ],
+      "rehydrations": 1,
+      "rollbackAvailable": true,
+      "manualInterventions": 0,
+      "forbiddenChanges": [],
+      "factUses": [
+        {
+          "turnId": "t07",
+          "factId": "node_runtime",
+          "available": true,
+          "actualValue": "22.13.0",
+          "protected": true,
+          "exact": true,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "active",
+          "rehydrated": false,
+          "failureReason": null
+        },
+        {
+          "turnId": "t07",
+          "factId": "package_manager",
+          "available": true,
+          "actualValue": "npm@10.9.2",
+          "protected": true,
+          "exact": true,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "active",
+          "rehydrated": false,
+          "failureReason": null
+        },
+        {
+          "turnId": "t08",
+          "factId": "registry_url",
+          "available": true,
+          "actualValue": "https://registry.npmjs.org/",
+          "protected": true,
+          "exact": true,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "active",
+          "rehydrated": false,
+          "failureReason": null
+        },
+        {
+          "turnId": "t08",
+          "factId": "build_command",
+          "available": true,
+          "actualValue": "npm run verify",
+          "protected": false,
+          "exact": true,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "archive",
+          "rehydrated": true,
+          "failureReason": null
+        },
+        {
+          "turnId": "t09",
+          "factId": "preserve_release_workflow",
+          "available": true,
+          "actualValue": "Do not modify .github/workflows/release.yml",
+          "protected": true,
+          "exact": false,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "active",
+          "rehydrated": false,
+          "failureReason": null
+        },
+        {
+          "turnId": "t10",
+          "factId": "node_runtime",
+          "available": true,
+          "actualValue": "22.13.0",
+          "protected": true,
+          "exact": true,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "active",
+          "rehydrated": false,
+          "failureReason": null
+        },
+        {
+          "turnId": "t10",
+          "factId": "package_manager",
+          "available": true,
+          "actualValue": "npm@10.9.2",
+          "protected": true,
+          "exact": true,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "active",
+          "rehydrated": false,
+          "failureReason": null
+        },
+        {
+          "turnId": "t10",
+          "factId": "registry_url",
+          "available": true,
+          "actualValue": "https://registry.npmjs.org/",
+          "protected": true,
+          "exact": true,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "active",
+          "rehydrated": false,
+          "failureReason": null
+        },
+        {
+          "turnId": "t10",
+          "factId": "build_command",
+          "available": true,
+          "actualValue": "npm run verify",
+          "protected": false,
+          "exact": true,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "active",
+          "rehydrated": false,
+          "failureReason": null
+        }
+      ],
+      "uncompressedContextTokens": 13440,
+      "finalActiveTokens": 7103,
+      "verifiedSuccess": true,
+      "oracleChecks": [
+        {
+          "id": "node_runtime",
+          "turnId": "t10",
+          "pass": true,
+          "expected": "22.13.0",
+          "actual": "22.13.0",
+          "exactPreserved": true,
+          "protected": true
+        },
+        {
+          "id": "package_manager",
+          "turnId": "t10",
+          "pass": true,
+          "expected": "npm@10.9.2",
+          "actual": "npm@10.9.2",
+          "exactPreserved": true,
+          "protected": true
+        },
+        {
+          "id": "registry_url",
+          "turnId": "t10",
+          "pass": true,
+          "expected": "https://registry.npmjs.org/",
+          "actual": "https://registry.npmjs.org/",
+          "exactPreserved": true,
+          "protected": true
+        },
+        {
+          "id": "build_command",
+          "turnId": "t10",
+          "pass": true,
+          "expected": "npm run verify",
+          "actual": "npm run verify",
+          "exactPreserved": true,
+          "protected": false
+        },
+        {
+          "id": "preserve_release_workflow",
+          "turnId": "t09",
+          "pass": true,
+          "expected": "Do not modify .github/workflows/release.yml",
+          "actual": "Do not modify .github/workflows/release.yml",
+          "exactPreserved": true,
+          "protected": true
+        }
+      ],
+      "forbiddenChangeChecksPassed": true,
+      "criticalRetentionRate": 1,
+      "exactRetentionRate": 1,
+      "cacheHitRate": 0.571356,
+      "compressionRatio": 0.471503,
+      "simulatedEvaluationSteps": 12
+    },
+    {
+      "fixtureId": "exact-config-migration",
+      "policy": "A_ADAPTIVE",
+      "turnsProcessed": 10,
+      "usage": {
+        "uncachedInputTokens": 22600,
+        "cachedInputTokens": 51510,
+        "cacheWriteInputTokens": 0,
+        "outputTokens": 2750,
+        "usageProxy": 76860
+      },
+      "compactions": [],
+      "rehydrations": 0,
+      "rollbackAvailable": true,
+      "manualInterventions": 0,
+      "forbiddenChanges": [],
+      "factUses": [
+        {
+          "turnId": "t07",
+          "factId": "node_runtime",
+          "available": true,
+          "actualValue": "22.13.0",
+          "protected": true,
+          "exact": true,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "active",
+          "rehydrated": false,
+          "failureReason": null
+        },
+        {
+          "turnId": "t07",
+          "factId": "package_manager",
+          "available": true,
+          "actualValue": "npm@10.9.2",
+          "protected": true,
+          "exact": true,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "active",
+          "rehydrated": false,
+          "failureReason": null
+        },
+        {
+          "turnId": "t08",
+          "factId": "registry_url",
+          "available": true,
+          "actualValue": "https://registry.npmjs.org/",
+          "protected": true,
+          "exact": true,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "active",
+          "rehydrated": false,
+          "failureReason": null
+        },
+        {
+          "turnId": "t08",
+          "factId": "build_command",
+          "available": true,
+          "actualValue": "npm run verify",
+          "protected": false,
+          "exact": true,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "active",
+          "rehydrated": false,
+          "failureReason": null
+        },
+        {
+          "turnId": "t09",
+          "factId": "preserve_release_workflow",
+          "available": true,
+          "actualValue": "Do not modify .github/workflows/release.yml",
+          "protected": true,
+          "exact": false,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "active",
+          "rehydrated": false,
+          "failureReason": null
+        },
+        {
+          "turnId": "t10",
+          "factId": "node_runtime",
+          "available": true,
+          "actualValue": "22.13.0",
+          "protected": true,
+          "exact": true,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "active",
+          "rehydrated": false,
+          "failureReason": null
+        },
+        {
+          "turnId": "t10",
+          "factId": "package_manager",
+          "available": true,
+          "actualValue": "npm@10.9.2",
+          "protected": true,
+          "exact": true,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "active",
+          "rehydrated": false,
+          "failureReason": null
+        },
+        {
+          "turnId": "t10",
+          "factId": "registry_url",
+          "available": true,
+          "actualValue": "https://registry.npmjs.org/",
+          "protected": true,
+          "exact": true,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "active",
+          "rehydrated": false,
+          "failureReason": null
+        },
+        {
+          "turnId": "t10",
+          "factId": "build_command",
+          "available": true,
+          "actualValue": "npm run verify",
+          "protected": false,
+          "exact": true,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "active",
+          "rehydrated": false,
+          "failureReason": null
+        }
+      ],
+      "uncompressedContextTokens": 13440,
+      "finalActiveTokens": 13440,
+      "verifiedSuccess": true,
+      "oracleChecks": [
+        {
+          "id": "node_runtime",
+          "turnId": "t10",
+          "pass": true,
+          "expected": "22.13.0",
+          "actual": "22.13.0",
+          "exactPreserved": true,
+          "protected": true
+        },
+        {
+          "id": "package_manager",
+          "turnId": "t10",
+          "pass": true,
+          "expected": "npm@10.9.2",
+          "actual": "npm@10.9.2",
+          "exactPreserved": true,
+          "protected": true
+        },
+        {
+          "id": "registry_url",
+          "turnId": "t10",
+          "pass": true,
+          "expected": "https://registry.npmjs.org/",
+          "actual": "https://registry.npmjs.org/",
+          "exactPreserved": true,
+          "protected": true
+        },
+        {
+          "id": "build_command",
+          "turnId": "t10",
+          "pass": true,
+          "expected": "npm run verify",
+          "actual": "npm run verify",
+          "exactPreserved": true,
+          "protected": false
+        },
+        {
+          "id": "preserve_release_workflow",
+          "turnId": "t09",
+          "pass": true,
+          "expected": "Do not modify .github/workflows/release.yml",
+          "actual": "Do not modify .github/workflows/release.yml",
+          "exactPreserved": true,
+          "protected": true
+        }
+      ],
+      "forbiddenChangeChecksPassed": true,
+      "criticalRetentionRate": 1,
+      "exactRetentionRate": 1,
+      "cacheHitRate": 0.695048,
+      "compressionRatio": 0,
+      "simulatedEvaluationSteps": 10
+    },
+    {
+      "fixtureId": "interrupted-refactor",
+      "policy": "M_MANUAL",
+      "turnsProcessed": 11,
+      "usage": {
+        "uncachedInputTokens": 28209,
+        "cachedInputTokens": 26947,
+        "cacheWriteInputTokens": 0,
+        "outputTokens": 3430,
+        "usageProxy": 58586
+      },
+      "compactions": [
+        {
+          "turnId": "t05",
+          "trigger": "frozen-manual-schedule",
+          "activeTokensBefore": 7840,
+          "activeTokensAfter": 2822,
+          "actions": {
+            "KEEP": 3,
+            "SUMMARIZE": 1,
+            "EXTERNALIZE": 3
+          },
+          "coreOptimizerUsed": false
+        },
+        {
+          "turnId": "t09",
+          "trigger": "frozen-manual-schedule",
+          "activeTokensBefore": 8510,
+          "activeTokensAfter": 3063,
+          "actions": {
+            "KEEP": 3,
+            "SUMMARIZE": 1,
+            "EXTERNALIZE": 4
+          },
+          "coreOptimizerUsed": false
+        }
+      ],
+      "rehydrations": 4,
+      "rollbackAvailable": true,
+      "manualInterventions": 2,
+      "forbiddenChanges": [],
+      "factUses": [
+        {
+          "turnId": "t07",
+          "factId": "adapter_decision",
+          "available": true,
+          "actualValue": "Use an adapter instead of changing callers",
+          "protected": false,
+          "exact": false,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "summary",
+          "rehydrated": false,
+          "failureReason": null
+        },
+        {
+          "turnId": "t07",
+          "factId": "target_module",
+          "available": true,
+          "actualValue": "src/client/create-client.ts",
+          "protected": false,
+          "exact": true,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "archive",
+          "rehydrated": true,
+          "failureReason": null
+        },
+        {
+          "turnId": "t07",
+          "factId": "public_signature",
+          "available": true,
+          "actualValue": "createClient(options: ClientOptions): Client",
+          "protected": true,
+          "exact": true,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "active",
+          "rehydrated": false,
+          "failureReason": null
+        },
+        {
+          "turnId": "t08",
+          "factId": "compatibility",
+          "available": true,
+          "actualValue": "Keep the legacy import path for one release",
+          "protected": true,
+          "exact": false,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "active",
+          "rehydrated": false,
+          "failureReason": null
+        },
+        {
+          "turnId": "t08",
+          "factId": "legacy_path",
+          "available": true,
+          "actualValue": "src/legacy/client.ts",
+          "protected": true,
+          "exact": true,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "active",
+          "rehydrated": false,
+          "failureReason": null
+        },
+        {
+          "turnId": "t09",
+          "factId": "unit_test",
+          "available": true,
+          "actualValue": "tests/client/create-client.test.ts",
+          "protected": false,
+          "exact": true,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "archive",
+          "rehydrated": true,
+          "failureReason": null
+        },
+        {
+          "turnId": "t09",
+          "factId": "public_signature",
+          "available": true,
+          "actualValue": "createClient(options: ClientOptions): Client",
+          "protected": true,
+          "exact": true,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "active",
+          "rehydrated": false,
+          "failureReason": null
+        },
+        {
+          "turnId": "t10",
+          "factId": "legacy_path",
+          "available": true,
+          "actualValue": "src/legacy/client.ts",
+          "protected": true,
+          "exact": true,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "active",
+          "rehydrated": false,
+          "failureReason": null
+        },
+        {
+          "turnId": "t10",
+          "factId": "adapter_decision",
+          "available": true,
+          "actualValue": "Use an adapter instead of changing callers",
+          "protected": false,
+          "exact": false,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "summary",
+          "rehydrated": false,
+          "failureReason": null
+        },
+        {
+          "turnId": "t11",
+          "factId": "public_signature",
+          "available": true,
+          "actualValue": "createClient(options: ClientOptions): Client",
+          "protected": true,
+          "exact": true,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "active",
+          "rehydrated": false,
+          "failureReason": null
+        },
+        {
+          "turnId": "t11",
+          "factId": "compatibility",
+          "available": true,
+          "actualValue": "Keep the legacy import path for one release",
+          "protected": true,
+          "exact": false,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "active",
+          "rehydrated": false,
+          "failureReason": null
+        },
+        {
+          "turnId": "t11",
+          "factId": "target_module",
+          "available": true,
+          "actualValue": "src/client/create-client.ts",
+          "protected": false,
+          "exact": true,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "archive",
+          "rehydrated": true,
+          "failureReason": null
+        },
+        {
+          "turnId": "t11",
+          "factId": "unit_test",
+          "available": true,
+          "actualValue": "tests/client/create-client.test.ts",
+          "protected": false,
+          "exact": true,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "archive",
+          "rehydrated": true,
+          "failureReason": null
+        }
+      ],
+      "uncompressedContextTokens": 15300,
+      "finalActiveTokens": 5031,
+      "verifiedSuccess": true,
+      "oracleChecks": [
+        {
+          "id": "public_signature",
+          "turnId": "t11",
+          "pass": true,
+          "expected": "createClient(options: ClientOptions): Client",
+          "actual": "createClient(options: ClientOptions): Client",
+          "exactPreserved": true,
+          "protected": true
+        },
+        {
+          "id": "compatibility",
+          "turnId": "t11",
+          "pass": true,
+          "expected": "Keep the legacy import path for one release",
+          "actual": "Keep the legacy import path for one release",
+          "exactPreserved": true,
+          "protected": true
+        },
+        {
+          "id": "adapter_decision",
+          "turnId": "t10",
+          "pass": true,
+          "expected": "Use an adapter instead of changing callers",
+          "actual": "Use an adapter instead of changing callers",
+          "exactPreserved": true,
+          "protected": false
+        },
+        {
+          "id": "legacy_path",
+          "turnId": "t10",
+          "pass": true,
+          "expected": "src/legacy/client.ts",
+          "actual": "src/legacy/client.ts",
+          "exactPreserved": true,
+          "protected": true
+        },
+        {
+          "id": "target_module",
+          "turnId": "t11",
+          "pass": true,
+          "expected": "src/client/create-client.ts",
+          "actual": "src/client/create-client.ts",
+          "exactPreserved": true,
+          "protected": false
+        },
+        {
+          "id": "unit_test",
+          "turnId": "t11",
+          "pass": true,
+          "expected": "tests/client/create-client.test.ts",
+          "actual": "tests/client/create-client.test.ts",
+          "exactPreserved": true,
+          "protected": false
+        }
+      ],
+      "forbiddenChangeChecksPassed": true,
+      "criticalRetentionRate": 1,
+      "exactRetentionRate": 1,
+      "cacheHitRate": 0.48856,
+      "compressionRatio": 0.671176,
+      "simulatedEvaluationSteps": 17
+    },
+    {
+      "fixtureId": "interrupted-refactor",
+      "policy": "F_FIXED",
+      "turnsProcessed": 11,
+      "usage": {
+        "uncachedInputTokens": 26991,
+        "cachedInputTokens": 38219,
+        "cacheWriteInputTokens": 0,
+        "outputTokens": 3430,
+        "usageProxy": 68640
+      },
+      "compactions": [
+        {
+          "turnId": "t06",
+          "trigger": "fixed-75-percent-threshold",
+          "activeTokensBefore": 9640,
+          "activeTokensAfter": 3470,
+          "actions": {
+            "KEEP": 3,
+            "SUMMARIZE": 1,
+            "EXTERNALIZE": 4
+          },
+          "coreOptimizerUsed": false
+        },
+        {
+          "turnId": "t11",
+          "trigger": "fixed-75-percent-threshold",
+          "activeTokensBefore": 9228,
+          "activeTokensAfter": 3322,
+          "actions": {
+            "KEEP": 3,
+            "SUMMARIZE": 1,
+            "EXTERNALIZE": 4
+          },
+          "coreOptimizerUsed": false
+        }
+      ],
+      "rehydrations": 2,
+      "rollbackAvailable": true,
+      "manualInterventions": 0,
+      "forbiddenChanges": [],
+      "factUses": [
+        {
+          "turnId": "t07",
+          "factId": "adapter_decision",
+          "available": true,
+          "actualValue": "Use an adapter instead of changing callers",
+          "protected": false,
+          "exact": false,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "summary",
+          "rehydrated": false,
+          "failureReason": null
+        },
+        {
+          "turnId": "t07",
+          "factId": "target_module",
+          "available": true,
+          "actualValue": "src/client/create-client.ts",
+          "protected": false,
+          "exact": true,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "archive",
+          "rehydrated": true,
+          "failureReason": null
+        },
+        {
+          "turnId": "t07",
+          "factId": "public_signature",
+          "available": true,
+          "actualValue": "createClient(options: ClientOptions): Client",
+          "protected": true,
+          "exact": true,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "active",
+          "rehydrated": false,
+          "failureReason": null
+        },
+        {
+          "turnId": "t08",
+          "factId": "compatibility",
+          "available": true,
+          "actualValue": "Keep the legacy import path for one release",
+          "protected": true,
+          "exact": false,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "active",
+          "rehydrated": false,
+          "failureReason": null
+        },
+        {
+          "turnId": "t08",
+          "factId": "legacy_path",
+          "available": true,
+          "actualValue": "src/legacy/client.ts",
+          "protected": true,
+          "exact": true,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "active",
+          "rehydrated": false,
+          "failureReason": null
+        },
+        {
+          "turnId": "t09",
+          "factId": "unit_test",
+          "available": true,
+          "actualValue": "tests/client/create-client.test.ts",
+          "protected": false,
+          "exact": true,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "archive",
+          "rehydrated": true,
+          "failureReason": null
+        },
+        {
+          "turnId": "t09",
+          "factId": "public_signature",
+          "available": true,
+          "actualValue": "createClient(options: ClientOptions): Client",
+          "protected": true,
+          "exact": true,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "active",
+          "rehydrated": false,
+          "failureReason": null
+        },
+        {
+          "turnId": "t10",
+          "factId": "legacy_path",
+          "available": true,
+          "actualValue": "src/legacy/client.ts",
+          "protected": true,
+          "exact": true,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "active",
+          "rehydrated": false,
+          "failureReason": null
+        },
+        {
+          "turnId": "t10",
+          "factId": "adapter_decision",
+          "available": true,
+          "actualValue": "Use an adapter instead of changing callers",
+          "protected": false,
+          "exact": false,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "summary",
+          "rehydrated": false,
+          "failureReason": null
+        },
+        {
+          "turnId": "t11",
+          "factId": "public_signature",
+          "available": true,
+          "actualValue": "createClient(options: ClientOptions): Client",
+          "protected": true,
+          "exact": true,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "active",
+          "rehydrated": false,
+          "failureReason": null
+        },
+        {
+          "turnId": "t11",
+          "factId": "compatibility",
+          "available": true,
+          "actualValue": "Keep the legacy import path for one release",
+          "protected": true,
+          "exact": false,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "active",
+          "rehydrated": false,
+          "failureReason": null
+        },
+        {
+          "turnId": "t11",
+          "factId": "target_module",
+          "available": true,
+          "actualValue": "src/client/create-client.ts",
+          "protected": false,
+          "exact": true,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "active",
+          "rehydrated": false,
+          "failureReason": null
+        },
+        {
+          "turnId": "t11",
+          "factId": "unit_test",
+          "available": true,
+          "actualValue": "tests/client/create-client.test.ts",
+          "protected": false,
+          "exact": true,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "active",
+          "rehydrated": false,
+          "failureReason": null
+        }
+      ],
+      "uncompressedContextTokens": 15300,
+      "finalActiveTokens": 3322,
+      "verifiedSuccess": true,
+      "oracleChecks": [
+        {
+          "id": "public_signature",
+          "turnId": "t11",
+          "pass": true,
+          "expected": "createClient(options: ClientOptions): Client",
+          "actual": "createClient(options: ClientOptions): Client",
+          "exactPreserved": true,
+          "protected": true
+        },
+        {
+          "id": "compatibility",
+          "turnId": "t11",
+          "pass": true,
+          "expected": "Keep the legacy import path for one release",
+          "actual": "Keep the legacy import path for one release",
+          "exactPreserved": true,
+          "protected": true
+        },
+        {
+          "id": "adapter_decision",
+          "turnId": "t10",
+          "pass": true,
+          "expected": "Use an adapter instead of changing callers",
+          "actual": "Use an adapter instead of changing callers",
+          "exactPreserved": true,
+          "protected": false
+        },
+        {
+          "id": "legacy_path",
+          "turnId": "t10",
+          "pass": true,
+          "expected": "src/legacy/client.ts",
+          "actual": "src/legacy/client.ts",
+          "exactPreserved": true,
+          "protected": true
+        },
+        {
+          "id": "target_module",
+          "turnId": "t11",
+          "pass": true,
+          "expected": "src/client/create-client.ts",
+          "actual": "src/client/create-client.ts",
+          "exactPreserved": true,
+          "protected": false
+        },
+        {
+          "id": "unit_test",
+          "turnId": "t11",
+          "pass": true,
+          "expected": "tests/client/create-client.test.ts",
+          "actual": "tests/client/create-client.test.ts",
+          "exactPreserved": true,
+          "protected": false
+        }
+      ],
+      "forbiddenChangeChecksPassed": true,
+      "criticalRetentionRate": 1,
+      "exactRetentionRate": 1,
+      "cacheHitRate": 0.586091,
+      "compressionRatio": 0.782876,
+      "simulatedEvaluationSteps": 15
+    },
+    {
+      "fixtureId": "interrupted-refactor",
+      "policy": "A_ADAPTIVE",
+      "turnsProcessed": 11,
+      "usage": {
+        "uncachedInputTokens": 27040,
+        "cachedInputTokens": 24500,
+        "cacheWriteInputTokens": 0,
+        "outputTokens": 3430,
+        "usageProxy": 54970
+      },
+      "compactions": [
+        {
+          "turnId": "t05",
+          "trigger": "adaptive:break_even_reached",
+          "activeTokensBefore": 7840,
+          "activeTokensAfter": 2822,
+          "actions": {
+            "KEEP": 5,
+            "SUMMARIZE": 1,
+            "EXTERNALIZE": 1
+          },
+          "coreOptimizerUsed": true
+        },
+        {
+          "turnId": "t08",
+          "trigger": "adaptive:break_even_reached",
+          "activeTokensBefore": 7302,
+          "activeTokensAfter": 2628,
+          "actions": {
+            "KEEP": 6,
+            "SUMMARIZE": 1,
+            "EXTERNALIZE": 1
+          },
+          "coreOptimizerUsed": true
+        }
+      ],
+      "rehydrations": 0,
+      "rollbackAvailable": true,
+      "manualInterventions": 0,
+      "forbiddenChanges": [],
+      "factUses": [
+        {
+          "turnId": "t07",
+          "factId": "adapter_decision",
+          "available": true,
+          "actualValue": "Use an adapter instead of changing callers",
+          "protected": false,
+          "exact": false,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "summary",
+          "rehydrated": false,
+          "failureReason": null
+        },
+        {
+          "turnId": "t07",
+          "factId": "target_module",
+          "available": true,
+          "actualValue": "src/client/create-client.ts",
+          "protected": false,
+          "exact": true,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "active",
+          "rehydrated": false,
+          "failureReason": null
+        },
+        {
+          "turnId": "t07",
+          "factId": "public_signature",
+          "available": true,
+          "actualValue": "createClient(options: ClientOptions): Client",
+          "protected": true,
+          "exact": true,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "active",
+          "rehydrated": false,
+          "failureReason": null
+        },
+        {
+          "turnId": "t08",
+          "factId": "compatibility",
+          "available": true,
+          "actualValue": "Keep the legacy import path for one release",
+          "protected": true,
+          "exact": false,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "active",
+          "rehydrated": false,
+          "failureReason": null
+        },
+        {
+          "turnId": "t08",
+          "factId": "legacy_path",
+          "available": true,
+          "actualValue": "src/legacy/client.ts",
+          "protected": true,
+          "exact": true,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "active",
+          "rehydrated": false,
+          "failureReason": null
+        },
+        {
+          "turnId": "t09",
+          "factId": "unit_test",
+          "available": true,
+          "actualValue": "tests/client/create-client.test.ts",
+          "protected": false,
+          "exact": true,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "active",
+          "rehydrated": false,
+          "failureReason": null
+        },
+        {
+          "turnId": "t09",
+          "factId": "public_signature",
+          "available": true,
+          "actualValue": "createClient(options: ClientOptions): Client",
+          "protected": true,
+          "exact": true,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "active",
+          "rehydrated": false,
+          "failureReason": null
+        },
+        {
+          "turnId": "t10",
+          "factId": "legacy_path",
+          "available": true,
+          "actualValue": "src/legacy/client.ts",
+          "protected": true,
+          "exact": true,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "active",
+          "rehydrated": false,
+          "failureReason": null
+        },
+        {
+          "turnId": "t10",
+          "factId": "adapter_decision",
+          "available": true,
+          "actualValue": "Use an adapter instead of changing callers",
+          "protected": false,
+          "exact": false,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "active",
+          "rehydrated": false,
+          "failureReason": null
+        },
+        {
+          "turnId": "t11",
+          "factId": "public_signature",
+          "available": true,
+          "actualValue": "createClient(options: ClientOptions): Client",
+          "protected": true,
+          "exact": true,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "active",
+          "rehydrated": false,
+          "failureReason": null
+        },
+        {
+          "turnId": "t11",
+          "factId": "compatibility",
+          "available": true,
+          "actualValue": "Keep the legacy import path for one release",
+          "protected": true,
+          "exact": false,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "active",
+          "rehydrated": false,
+          "failureReason": null
+        },
+        {
+          "turnId": "t11",
+          "factId": "target_module",
+          "available": true,
+          "actualValue": "src/client/create-client.ts",
+          "protected": false,
+          "exact": true,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "active",
+          "rehydrated": false,
+          "failureReason": null
+        },
+        {
+          "turnId": "t11",
+          "factId": "unit_test",
+          "available": true,
+          "actualValue": "tests/client/create-client.test.ts",
+          "protected": false,
+          "exact": true,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "active",
+          "rehydrated": false,
+          "failureReason": null
+        }
+      ],
+      "uncompressedContextTokens": 15300,
+      "finalActiveTokens": 5608,
+      "verifiedSuccess": true,
+      "oracleChecks": [
+        {
+          "id": "public_signature",
+          "turnId": "t11",
+          "pass": true,
+          "expected": "createClient(options: ClientOptions): Client",
+          "actual": "createClient(options: ClientOptions): Client",
+          "exactPreserved": true,
+          "protected": true
+        },
+        {
+          "id": "compatibility",
+          "turnId": "t11",
+          "pass": true,
+          "expected": "Keep the legacy import path for one release",
+          "actual": "Keep the legacy import path for one release",
+          "exactPreserved": true,
+          "protected": true
+        },
+        {
+          "id": "adapter_decision",
+          "turnId": "t10",
+          "pass": true,
+          "expected": "Use an adapter instead of changing callers",
+          "actual": "Use an adapter instead of changing callers",
+          "exactPreserved": true,
+          "protected": false
+        },
+        {
+          "id": "legacy_path",
+          "turnId": "t10",
+          "pass": true,
+          "expected": "src/legacy/client.ts",
+          "actual": "src/legacy/client.ts",
+          "exactPreserved": true,
+          "protected": true
+        },
+        {
+          "id": "target_module",
+          "turnId": "t11",
+          "pass": true,
+          "expected": "src/client/create-client.ts",
+          "actual": "src/client/create-client.ts",
+          "exactPreserved": true,
+          "protected": false
+        },
+        {
+          "id": "unit_test",
+          "turnId": "t11",
+          "pass": true,
+          "expected": "tests/client/create-client.test.ts",
+          "actual": "tests/client/create-client.test.ts",
+          "exactPreserved": true,
+          "protected": false
+        }
+      ],
+      "forbiddenChangeChecksPassed": true,
+      "criticalRetentionRate": 1,
+      "exactRetentionRate": 1,
+      "cacheHitRate": 0.475359,
+      "compressionRatio": 0.633464,
+      "simulatedEvaluationSteps": 13
+    },
+    {
+      "fixtureId": "noisy-incident-debug",
+      "policy": "M_MANUAL",
+      "turnsProcessed": 12,
+      "usage": {
+        "uncachedInputTokens": 31560,
+        "cachedInputTokens": 36042,
+        "cacheWriteInputTokens": 0,
+        "outputTokens": 3550,
+        "usageProxy": 71152
+      },
+      "compactions": [
+        {
+          "turnId": "t06",
+          "trigger": "frozen-manual-schedule",
+          "activeTokensBefore": 9650,
+          "activeTokensAfter": 3474,
+          "actions": {
+            "KEEP": 4,
+            "SUMMARIZE": 1,
+            "EXTERNALIZE": 3
+          },
+          "coreOptimizerUsed": false
+        },
+        {
+          "turnId": "t10",
+          "trigger": "frozen-manual-schedule",
+          "activeTokensBefore": 8510,
+          "activeTokensAfter": 3063,
+          "actions": {
+            "KEEP": 4,
+            "SUMMARIZE": 2,
+            "EXTERNALIZE": 3
+          },
+          "coreOptimizerUsed": false
+        }
+      ],
+      "rehydrations": 2,
+      "rollbackAvailable": true,
+      "manualInterventions": 2,
+      "forbiddenChanges": [],
+      "factUses": [
+        {
+          "turnId": "t07",
+          "factId": "correlation_header",
+          "available": true,
+          "actualValue": "X-Request-Id",
+          "protected": true,
+          "exact": true,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "active",
+          "rehydrated": false,
+          "failureReason": null
+        },
+        {
+          "turnId": "t07",
+          "factId": "root_cause",
+          "available": true,
+          "actualValue": "A proxy lowercased the request-id lookup key",
+          "protected": false,
+          "exact": false,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "summary",
+          "rehydrated": false,
+          "failureReason": null
+        },
+        {
+          "turnId": "t07",
+          "factId": "fix_location",
+          "available": true,
+          "actualValue": "src/http/correlation.ts",
+          "protected": false,
+          "exact": true,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "archive",
+          "rehydrated": true,
+          "failureReason": null
+        },
+        {
+          "turnId": "t09",
+          "factId": "incident_id",
+          "available": true,
+          "actualValue": "INC-4821",
+          "protected": true,
+          "exact": true,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "active",
+          "rehydrated": false,
+          "failureReason": null
+        },
+        {
+          "turnId": "t09",
+          "factId": "correlation_value",
+          "available": true,
+          "actualValue": "req_01J2F8Y7K3",
+          "protected": true,
+          "exact": true,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "active",
+          "rehydrated": false,
+          "failureReason": null
+        },
+        {
+          "turnId": "t10",
+          "factId": "no_charge_retry",
+          "available": true,
+          "actualValue": "Never replay POST /charge in production",
+          "protected": true,
+          "exact": false,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "active",
+          "rehydrated": false,
+          "failureReason": null
+        },
+        {
+          "turnId": "t11",
+          "factId": "correlation_header",
+          "available": true,
+          "actualValue": "X-Request-Id",
+          "protected": true,
+          "exact": true,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "active",
+          "rehydrated": false,
+          "failureReason": null
+        },
+        {
+          "turnId": "t11",
+          "factId": "root_cause",
+          "available": true,
+          "actualValue": "A proxy lowercased the request-id lookup key",
+          "protected": false,
+          "exact": false,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "summary",
+          "rehydrated": false,
+          "failureReason": null
+        },
+        {
+          "turnId": "t11",
+          "factId": "regression_test",
+          "available": true,
+          "actualValue": "preserves mixed-case request-id lookup",
+          "protected": false,
+          "exact": false,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "summary",
+          "rehydrated": false,
+          "failureReason": null
+        },
+        {
+          "turnId": "t12",
+          "factId": "incident_id",
+          "available": true,
+          "actualValue": "INC-4821",
+          "protected": true,
+          "exact": true,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "active",
+          "rehydrated": false,
+          "failureReason": null
+        },
+        {
+          "turnId": "t12",
+          "factId": "correlation_value",
+          "available": true,
+          "actualValue": "req_01J2F8Y7K3",
+          "protected": true,
+          "exact": true,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "active",
+          "rehydrated": false,
+          "failureReason": null
+        },
+        {
+          "turnId": "t12",
+          "factId": "fix_location",
+          "available": true,
+          "actualValue": "src/http/correlation.ts",
+          "protected": false,
+          "exact": true,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "archive",
+          "rehydrated": true,
+          "failureReason": null
+        }
+      ],
+      "uncompressedContextTokens": 16460,
+      "finalActiveTokens": 4929,
+      "verifiedSuccess": true,
+      "oracleChecks": [
+        {
+          "id": "incident_id",
+          "turnId": "t12",
+          "pass": true,
+          "expected": "INC-4821",
+          "actual": "INC-4821",
+          "exactPreserved": true,
+          "protected": true
+        },
+        {
+          "id": "correlation_header",
+          "turnId": "t11",
+          "pass": true,
+          "expected": "X-Request-Id",
+          "actual": "X-Request-Id",
+          "exactPreserved": true,
+          "protected": true
+        },
+        {
+          "id": "correlation_value",
+          "turnId": "t12",
+          "pass": true,
+          "expected": "req_01J2F8Y7K3",
+          "actual": "req_01J2F8Y7K3",
+          "exactPreserved": true,
+          "protected": true
+        },
+        {
+          "id": "root_cause",
+          "turnId": "t11",
+          "pass": true,
+          "expected": "A proxy lowercased the request-id lookup key",
+          "actual": "A proxy lowercased the request-id lookup key",
+          "exactPreserved": true,
+          "protected": false
+        },
+        {
+          "id": "fix_location",
+          "turnId": "t12",
+          "pass": true,
+          "expected": "src/http/correlation.ts",
+          "actual": "src/http/correlation.ts",
+          "exactPreserved": true,
+          "protected": false
+        },
+        {
+          "id": "no_charge_retry",
+          "turnId": "t10",
+          "pass": true,
+          "expected": "Never replay POST /charge in production",
+          "actual": "Never replay POST /charge in production",
+          "exactPreserved": true,
+          "protected": true
+        }
+      ],
+      "forbiddenChangeChecksPassed": true,
+      "criticalRetentionRate": 1,
+      "exactRetentionRate": 1,
+      "cacheHitRate": 0.53315,
+      "compressionRatio": 0.700547,
+      "simulatedEvaluationSteps": 16
+    },
+    {
+      "fixtureId": "noisy-incident-debug",
+      "policy": "F_FIXED",
+      "turnsProcessed": 12,
+      "usage": {
+        "uncachedInputTokens": 31180,
+        "cachedInputTokens": 41242,
+        "cacheWriteInputTokens": 0,
+        "outputTokens": 3550,
+        "usageProxy": 75972
+      },
+      "compactions": [
+        {
+          "turnId": "t06",
+          "trigger": "fixed-75-percent-threshold",
+          "activeTokensBefore": 9650,
+          "activeTokensAfter": 3474,
+          "actions": {
+            "KEEP": 4,
+            "SUMMARIZE": 1,
+            "EXTERNALIZE": 3
+          },
+          "coreOptimizerUsed": false
+        },
+        {
+          "turnId": "t11",
+          "trigger": "fixed-75-percent-threshold",
+          "activeTokensBefore": 9490,
+          "activeTokensAfter": 3416,
+          "actions": {
+            "KEEP": 4,
+            "SUMMARIZE": 2,
+            "EXTERNALIZE": 3
+          },
+          "coreOptimizerUsed": false
+        }
+      ],
+      "rehydrations": 2,
+      "rollbackAvailable": true,
+      "manualInterventions": 0,
+      "forbiddenChanges": [],
+      "factUses": [
+        {
+          "turnId": "t07",
+          "factId": "correlation_header",
+          "available": true,
+          "actualValue": "X-Request-Id",
+          "protected": true,
+          "exact": true,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "active",
+          "rehydrated": false,
+          "failureReason": null
+        },
+        {
+          "turnId": "t07",
+          "factId": "root_cause",
+          "available": true,
+          "actualValue": "A proxy lowercased the request-id lookup key",
+          "protected": false,
+          "exact": false,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "summary",
+          "rehydrated": false,
+          "failureReason": null
+        },
+        {
+          "turnId": "t07",
+          "factId": "fix_location",
+          "available": true,
+          "actualValue": "src/http/correlation.ts",
+          "protected": false,
+          "exact": true,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "archive",
+          "rehydrated": true,
+          "failureReason": null
+        },
+        {
+          "turnId": "t09",
+          "factId": "incident_id",
+          "available": true,
+          "actualValue": "INC-4821",
+          "protected": true,
+          "exact": true,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "active",
+          "rehydrated": false,
+          "failureReason": null
+        },
+        {
+          "turnId": "t09",
+          "factId": "correlation_value",
+          "available": true,
+          "actualValue": "req_01J2F8Y7K3",
+          "protected": true,
+          "exact": true,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "active",
+          "rehydrated": false,
+          "failureReason": null
+        },
+        {
+          "turnId": "t10",
+          "factId": "no_charge_retry",
+          "available": true,
+          "actualValue": "Never replay POST /charge in production",
+          "protected": true,
+          "exact": false,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "active",
+          "rehydrated": false,
+          "failureReason": null
+        },
+        {
+          "turnId": "t11",
+          "factId": "correlation_header",
+          "available": true,
+          "actualValue": "X-Request-Id",
+          "protected": true,
+          "exact": true,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "active",
+          "rehydrated": false,
+          "failureReason": null
+        },
+        {
+          "turnId": "t11",
+          "factId": "root_cause",
+          "available": true,
+          "actualValue": "A proxy lowercased the request-id lookup key",
+          "protected": false,
+          "exact": false,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "summary",
+          "rehydrated": false,
+          "failureReason": null
+        },
+        {
+          "turnId": "t11",
+          "factId": "regression_test",
+          "available": true,
+          "actualValue": "preserves mixed-case request-id lookup",
+          "protected": false,
+          "exact": false,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "active",
+          "rehydrated": false,
+          "failureReason": null
+        },
+        {
+          "turnId": "t12",
+          "factId": "incident_id",
+          "available": true,
+          "actualValue": "INC-4821",
+          "protected": true,
+          "exact": true,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "active",
+          "rehydrated": false,
+          "failureReason": null
+        },
+        {
+          "turnId": "t12",
+          "factId": "correlation_value",
+          "available": true,
+          "actualValue": "req_01J2F8Y7K3",
+          "protected": true,
+          "exact": true,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "active",
+          "rehydrated": false,
+          "failureReason": null
+        },
+        {
+          "turnId": "t12",
+          "factId": "fix_location",
+          "available": true,
+          "actualValue": "src/http/correlation.ts",
+          "protected": false,
+          "exact": true,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "archive",
+          "rehydrated": true,
+          "failureReason": null
+        }
+      ],
+      "uncompressedContextTokens": 16460,
+      "finalActiveTokens": 4302,
+      "verifiedSuccess": true,
+      "oracleChecks": [
+        {
+          "id": "incident_id",
+          "turnId": "t12",
+          "pass": true,
+          "expected": "INC-4821",
+          "actual": "INC-4821",
+          "exactPreserved": true,
+          "protected": true
+        },
+        {
+          "id": "correlation_header",
+          "turnId": "t11",
+          "pass": true,
+          "expected": "X-Request-Id",
+          "actual": "X-Request-Id",
+          "exactPreserved": true,
+          "protected": true
+        },
+        {
+          "id": "correlation_value",
+          "turnId": "t12",
+          "pass": true,
+          "expected": "req_01J2F8Y7K3",
+          "actual": "req_01J2F8Y7K3",
+          "exactPreserved": true,
+          "protected": true
+        },
+        {
+          "id": "root_cause",
+          "turnId": "t11",
+          "pass": true,
+          "expected": "A proxy lowercased the request-id lookup key",
+          "actual": "A proxy lowercased the request-id lookup key",
+          "exactPreserved": true,
+          "protected": false
+        },
+        {
+          "id": "fix_location",
+          "turnId": "t12",
+          "pass": true,
+          "expected": "src/http/correlation.ts",
+          "actual": "src/http/correlation.ts",
+          "exactPreserved": true,
+          "protected": false
+        },
+        {
+          "id": "no_charge_retry",
+          "turnId": "t10",
+          "pass": true,
+          "expected": "Never replay POST /charge in production",
+          "actual": "Never replay POST /charge in production",
+          "exactPreserved": true,
+          "protected": true
+        }
+      ],
+      "forbiddenChangeChecksPassed": true,
+      "criticalRetentionRate": 1,
+      "exactRetentionRate": 1,
+      "cacheHitRate": 0.569468,
+      "compressionRatio": 0.738639,
+      "simulatedEvaluationSteps": 16
+    },
+    {
+      "fixtureId": "noisy-incident-debug",
+      "policy": "A_ADAPTIVE",
+      "turnsProcessed": 12,
+      "usage": {
+        "uncachedInputTokens": 29131,
+        "cachedInputTokens": 31954,
+        "cacheWriteInputTokens": 0,
+        "outputTokens": 3550,
+        "usageProxy": 64635
+      },
+      "compactions": [
+        {
+          "turnId": "t05",
+          "trigger": "adaptive:break_even_reached",
+          "activeTokensBefore": 7810,
+          "activeTokensAfter": 2811,
+          "actions": {
+            "KEEP": 5,
+            "SUMMARIZE": 1,
+            "EXTERNALIZE": 1
+          },
+          "coreOptimizerUsed": true
+        },
+        {
+          "turnId": "t08",
+          "trigger": "adaptive:break_even_reached",
+          "activeTokensBefore": 7481,
+          "activeTokensAfter": 2693,
+          "actions": {
+            "KEEP": 7,
+            "SUMMARIZE": 0,
+            "EXTERNALIZE": 2
+          },
+          "coreOptimizerUsed": true
+        }
+      ],
+      "rehydrations": 0,
+      "rollbackAvailable": true,
+      "manualInterventions": 0,
+      "forbiddenChanges": [],
+      "factUses": [
+        {
+          "turnId": "t07",
+          "factId": "correlation_header",
+          "available": true,
+          "actualValue": "X-Request-Id",
+          "protected": true,
+          "exact": true,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "active",
+          "rehydrated": false,
+          "failureReason": null
+        },
+        {
+          "turnId": "t07",
+          "factId": "root_cause",
+          "available": true,
+          "actualValue": "A proxy lowercased the request-id lookup key",
+          "protected": false,
+          "exact": false,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "summary",
+          "rehydrated": false,
+          "failureReason": null
+        },
+        {
+          "turnId": "t07",
+          "factId": "fix_location",
+          "available": true,
+          "actualValue": "src/http/correlation.ts",
+          "protected": false,
+          "exact": true,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "active",
+          "rehydrated": false,
+          "failureReason": null
+        },
+        {
+          "turnId": "t09",
+          "factId": "incident_id",
+          "available": true,
+          "actualValue": "INC-4821",
+          "protected": true,
+          "exact": true,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "active",
+          "rehydrated": false,
+          "failureReason": null
+        },
+        {
+          "turnId": "t09",
+          "factId": "correlation_value",
+          "available": true,
+          "actualValue": "req_01J2F8Y7K3",
+          "protected": true,
+          "exact": true,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "active",
+          "rehydrated": false,
+          "failureReason": null
+        },
+        {
+          "turnId": "t10",
+          "factId": "no_charge_retry",
+          "available": true,
+          "actualValue": "Never replay POST /charge in production",
+          "protected": true,
+          "exact": false,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "active",
+          "rehydrated": false,
+          "failureReason": null
+        },
+        {
+          "turnId": "t11",
+          "factId": "correlation_header",
+          "available": true,
+          "actualValue": "X-Request-Id",
+          "protected": true,
+          "exact": true,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "active",
+          "rehydrated": false,
+          "failureReason": null
+        },
+        {
+          "turnId": "t11",
+          "factId": "root_cause",
+          "available": true,
+          "actualValue": "A proxy lowercased the request-id lookup key",
+          "protected": false,
+          "exact": false,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "active",
+          "rehydrated": false,
+          "failureReason": null
+        },
+        {
+          "turnId": "t11",
+          "factId": "regression_test",
+          "available": true,
+          "actualValue": "preserves mixed-case request-id lookup",
+          "protected": false,
+          "exact": false,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "active",
+          "rehydrated": false,
+          "failureReason": null
+        },
+        {
+          "turnId": "t12",
+          "factId": "incident_id",
+          "available": true,
+          "actualValue": "INC-4821",
+          "protected": true,
+          "exact": true,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "active",
+          "rehydrated": false,
+          "failureReason": null
+        },
+        {
+          "turnId": "t12",
+          "factId": "correlation_value",
+          "available": true,
+          "actualValue": "req_01J2F8Y7K3",
+          "protected": true,
+          "exact": true,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "active",
+          "rehydrated": false,
+          "failureReason": null
+        },
+        {
+          "turnId": "t12",
+          "factId": "fix_location",
+          "available": true,
+          "actualValue": "src/http/correlation.ts",
+          "protected": false,
+          "exact": true,
+          "exactPreserved": true,
+          "semanticIntegrity": true,
+          "locationAtRequest": "active",
+          "rehydrated": false,
+          "failureReason": null
+        }
+      ],
+      "uncompressedContextTokens": 16460,
+      "finalActiveTokens": 6673,
+      "verifiedSuccess": true,
+      "oracleChecks": [
+        {
+          "id": "incident_id",
+          "turnId": "t12",
+          "pass": true,
+          "expected": "INC-4821",
+          "actual": "INC-4821",
+          "exactPreserved": true,
+          "protected": true
+        },
+        {
+          "id": "correlation_header",
+          "turnId": "t11",
+          "pass": true,
+          "expected": "X-Request-Id",
+          "actual": "X-Request-Id",
+          "exactPreserved": true,
+          "protected": true
+        },
+        {
+          "id": "correlation_value",
+          "turnId": "t12",
+          "pass": true,
+          "expected": "req_01J2F8Y7K3",
+          "actual": "req_01J2F8Y7K3",
+          "exactPreserved": true,
+          "protected": true
+        },
+        {
+          "id": "root_cause",
+          "turnId": "t11",
+          "pass": true,
+          "expected": "A proxy lowercased the request-id lookup key",
+          "actual": "A proxy lowercased the request-id lookup key",
+          "exactPreserved": true,
+          "protected": false
+        },
+        {
+          "id": "fix_location",
+          "turnId": "t12",
+          "pass": true,
+          "expected": "src/http/correlation.ts",
+          "actual": "src/http/correlation.ts",
+          "exactPreserved": true,
+          "protected": false
+        },
+        {
+          "id": "no_charge_retry",
+          "turnId": "t10",
+          "pass": true,
+          "expected": "Never replay POST /charge in production",
+          "actual": "Never replay POST /charge in production",
+          "exactPreserved": true,
+          "protected": true
+        }
+      ],
+      "forbiddenChangeChecksPassed": true,
+      "criticalRetentionRate": 1,
+      "exactRetentionRate": 1,
+      "cacheHitRate": 0.523107,
+      "compressionRatio": 0.594593,
+      "simulatedEvaluationSteps": 14
+    }
+  ],
+  "negativeControls": [
+    {
+      "fixtureId": "exact-config-migration",
+      "control": "CORRUPT_PROTECTED_REQUIRED_USE",
+      "sourcePolicy": "A_ADAPTIVE",
+      "expectedFailure": true,
+      "failureDetected": true,
+      "failedChecks": [
+        "node_runtime@t10"
+      ]
+    },
+    {
+      "fixtureId": "interrupted-refactor",
+      "control": "CORRUPT_PROTECTED_REQUIRED_USE",
+      "sourcePolicy": "A_ADAPTIVE",
+      "expectedFailure": true,
+      "failureDetected": true,
+      "failedChecks": [
+        "public_signature@t11"
+      ]
+    },
+    {
+      "fixtureId": "noisy-incident-debug",
+      "control": "CORRUPT_PROTECTED_REQUIRED_USE",
+      "sourcePolicy": "A_ADAPTIVE",
+      "expectedFailure": true,
+      "failureDetected": true,
+      "failedChecks": [
+        "incident_id@t12"
+      ]
+    }
+  ],
+  "oracleNegativeControlPassed": true,
+  "aggregates": [
+    {
+      "policy": "M_MANUAL",
+      "totalUsageProxy": 179654,
+      "verifiedSuccesses": 3,
+      "upvs": 59884.666667,
+      "successRate": 1,
+      "criticalRetentionRate": 1,
+      "exactRetentionRate": 1,
+      "cacheHitRate": 0.511388,
+      "compactions": 6,
+      "rehydrations": 8,
+      "manualInterventions": 6
+    },
+    {
+      "policy": "F_FIXED",
+      "totalUsageProxy": 202961,
+      "verifiedSuccesses": 3,
+      "upvs": 67653.666667,
+      "successRate": 1,
+      "criticalRetentionRate": 1,
+      "exactRetentionRate": 1,
+      "cacheHitRate": 0.575625,
+      "compactions": 5,
+      "rehydrations": 5,
+      "manualInterventions": 0
+    },
+    {
+      "policy": "A_ADAPTIVE",
+      "totalUsageProxy": 196465,
+      "verifiedSuccesses": 3,
+      "upvs": 65488.333333,
+      "successRate": 1,
+      "criticalRetentionRate": 1,
+      "exactRetentionRate": 1,
+      "cacheHitRate": 0.578167,
+      "compactions": 4,
+      "rehydrations": 0,
+      "manualInterventions": 0
+    }
+  ],
+  "receiptHash": "f7699823546f79657aea0faa290c0c648b8876236456f7a8ff02003875147ddd"
+}

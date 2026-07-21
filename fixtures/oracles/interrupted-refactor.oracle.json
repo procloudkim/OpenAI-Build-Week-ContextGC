@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "fixtureId": "interrupted-refactor",
+  "expectedTurnCount": 11,
+  "requiredFacts": [
+    {"id": "public_signature", "expectedValue": "createClient(options: ClientOptions): Client"},
+    {"id": "compatibility", "expectedValue": "Keep the legacy import path for one release"},
+    {"id": "adapter_decision", "expectedValue": "Use an adapter instead of changing callers"},
+    {"id": "legacy_path", "expectedValue": "src/legacy/client.ts"},
+    {"id": "target_module", "expectedValue": "src/client/create-client.ts"},
+    {"id": "unit_test", "expectedValue": "tests/client/create-client.test.ts"}
+  ],
+  "requiredUses": [
+    {"turnId": "t11", "factId": "public_signature", "expectedValue": "createClient(options: ClientOptions): Client", "requireExact": true},
+    {"turnId": "t11", "factId": "compatibility", "expectedValue": "Keep the legacy import path for one release", "requireExact": false},
+    {"turnId": "t10", "factId": "adapter_decision", "expectedValue": "Use an adapter instead of changing callers", "requireExact": false},
+    {"turnId": "t10", "factId": "legacy_path", "expectedValue": "src/legacy/client.ts", "requireExact": true},
+    {"turnId": "t11", "factId": "target_module", "expectedValue": "src/client/create-client.ts", "requireExact": true},
+    {"turnId": "t11", "factId": "unit_test", "expectedValue": "tests/client/create-client.test.ts", "requireExact": true}
+  ],
+  "forbiddenChanges": ["src/legacy/client.ts"]
+}

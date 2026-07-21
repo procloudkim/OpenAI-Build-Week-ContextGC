@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 1,
+  "sourceReceiptHash": "f7699823546f79657aea0faa290c0c648b8876236456f7a8ff02003875147ddd",
+  "benchmarkVersion": "contextgc-synthetic-v1",
+  "scope": "deterministic-synthetic-policy-simulation",
+  "primaryMetric": "UPVS",
+  "codexCredits": null,
+  "liveCodexProof": false,
+  "apiCallsMade": 0,
+  "oracleNegativeControlPassed": true,
+  "usageProxyDefinition": {
+    "id": "neutral-v1",
+    "unit": "weighted-token-units",
+    "weights": {
+      "uncachedInputWeight": 1,
+      "cachedInputWeight": 1,
+      "cacheWriteInputWeight": 1,
+      "outputWeight": 1
+    },
+    "codexCredits": null,
+    "estimatedApiEquivalentUsd": null,
+    "limitation": "The proxy sums non-overlapping token categories with neutral weights. It is not a ChatGPT/Codex bill, credit estimate, or model-quality measurement."
+  },
+  "policies": [
+    {
+      "policy": "M_MANUAL",
+      "upvs": 59884.666667,
+      "verifiedSuccesses": 3,
+      "fixtureCount": 3,
+      "criticalRetentionRate": 1,
+      "compactions": 6,
+      "manualInterventions": 6,
+      "totalUsageProxy": 179654,
+      "rawTokenTotals": {
+        "uncachedInputTokens": 82851,
+        "cachedInputTokens": 86713,
+        "cacheWriteInputTokens": 0,
+        "outputTokens": 10090
+      }
+    },
+    {
+      "policy": "F_FIXED",
+      "upvs": 67653.666667,
+      "verifiedSuccesses": 3,
+      "fixtureCount": 3,
+      "criticalRetentionRate": 1,
+      "compactions": 5,
+      "manualInterventions": 0,
+      "totalUsageProxy": 202961,
+      "rawTokenTotals": {
+        "uncachedInputTokens": 81926,
+        "cachedInputTokens": 111125,
+        "cacheWriteInputTokens": 0,
+        "outputTokens": 9910
+      }
+    },
+    {
+      "policy": "A_ADAPTIVE",
+      "upvs": 65488.333333,
+      "verifiedSuccesses": 3,
+      "fixtureCount": 3,
+      "criticalRetentionRate": 1,
+      "compactions": 4,
+      "manualInterventions": 0,
+      "totalUsageProxy": 196465,
+      "rawTokenTotals": {
+        "uncachedInputTokens": 78771,
+        "cachedInputTokens": 107964,
+        "cacheWriteInputTokens": 0,
+        "outputTokens": 9730
+      }
+    }
+  ],
+  "caveat": "Deterministic synthetic replay only. These results do not prove native Codex compaction quality, live integration, real credits, or production savings."
+}

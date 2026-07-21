@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "fixtureId": "exact-config-migration",
+  "expectedTurnCount": 10,
+  "requiredFacts": [
+    {"id": "node_runtime", "expectedValue": "22.13.0"},
+    {"id": "package_manager", "expectedValue": "npm@10.9.2"},
+    {"id": "registry_url", "expectedValue": "https://registry.npmjs.org/"},
+    {"id": "build_command", "expectedValue": "npm run verify"},
+    {"id": "preserve_release_workflow", "expectedValue": "Do not modify .github/workflows/release.yml"}
+  ],
+  "requiredUses": [
+    {"turnId": "t10", "factId": "node_runtime", "expectedValue": "22.13.0", "requireExact": true},
+    {"turnId": "t10", "factId": "package_manager", "expectedValue": "npm@10.9.2", "requireExact": true},
+    {"turnId": "t10", "factId": "registry_url", "expectedValue": "https://registry.npmjs.org/", "requireExact": true},
+    {"turnId": "t10", "factId": "build_command", "expectedValue": "npm run verify", "requireExact": true},
+    {"turnId": "t09", "factId": "preserve_release_workflow", "expectedValue": "Do not modify .github/workflows/release.yml", "requireExact": false}
+  ],
+  "forbiddenChanges": [".github/workflows/release.yml"]
+}

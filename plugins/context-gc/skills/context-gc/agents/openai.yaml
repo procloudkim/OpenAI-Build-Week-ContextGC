@@ -1,0 +1,4 @@
+interface:
+  display_name: "ContextGC"
+  short_description: "Protect and restore Codex task context"
+  default_prompt: "Use ContextGC to checkpoint this task, inspect context risk, and restore only the evidence needed."

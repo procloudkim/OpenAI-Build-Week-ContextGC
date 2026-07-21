@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "context-gc": {
+      "command": "node",
+      "args": [
+        "./scripts/mcp-server.bundle.mjs"
+      ],
+      "cwd": "."
+    }
+  }
+}

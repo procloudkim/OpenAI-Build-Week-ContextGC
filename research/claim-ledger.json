@@ -1,0 +1,695 @@
+{
+  "schemaVersion": "1.0.0",
+  "artifact": "ContextGC claim ledger",
+  "generatedAt": "2026-07-18T00:00:00+09:00",
+  "evidenceCutoff": "2026-07-18",
+  "scope": "Codex-native compaction boundaries, token/cache economics, mathematical context policy, evaluation research, and closest prior art",
+  "verdictDefinitions": {
+    "VERIFIED": "The cited primary or official source directly supports the claim. Author-reported benchmark numbers remain author-reported unless independently reproduced.",
+    "INFERENCE": "A product or engineering conclusion derived from verified facts; it still requires ContextGC-specific testing.",
+    "UNKNOWN": "The inspected public primary sources do not establish the claim.",
+    "REJECTED": "Primary evidence or established prior art contradicts the proposed claim."
+  },
+  "claims": [
+    {
+      "id": "CG-001",
+      "claim": "Codex hooks expose SessionStart, UserPromptSubmit, PostToolUse, PreCompact, PostCompact, and Stop lifecycle events suitable for a context control plane.",
+      "verdict": "VERIFIED",
+      "evidenceClass": "official-product-doc",
+      "sources": [
+        {
+          "title": "OpenAI Codex Hooks",
+          "url": "https://learn.chatgpt.com/docs/hooks",
+          "publishedOrUpdated": "current documentation",
+          "accessed": "2026-07-18"
+        }
+      ],
+      "counterevidence": "Event presence does not imply every desired action is available at that event.",
+      "productDecision": "Use hooks for observation, bounded injection, snapshots, audit, and fail-closed control only."
+    },
+    {
+      "id": "CG-002",
+      "claim": "SessionStart and UserPromptSubmit can add model-visible developer context.",
+      "verdict": "VERIFIED",
+      "evidenceClass": "official-product-doc",
+      "sources": [
+        {
+          "title": "Hooks - SessionStart and UserPromptSubmit",
+          "url": "https://learn.chatgpt.com/docs/hooks#sessionstart",
+          "publishedOrUpdated": "current documentation",
+          "accessed": "2026-07-18"
+        },
+        {
+          "title": "Hooks - UserPromptSubmit",
+          "url": "https://learn.chatgpt.com/docs/hooks#userpromptsubmit",
+          "publishedOrUpdated": "current documentation",
+          "accessed": "2026-07-18"
+        }
+      ],
+      "counterevidence": "Injected developer context is not the same as replacing or editing native conversation history.",
+      "productDecision": "Inject only the latest schema-valid bounded Task Frame and preserve a strict token cap."
+    },
+    {
+      "id": "CG-003",
+      "claim": "PreCompact can stop compaction with continue=false, while PostCompact runs only after compaction and cannot undo it.",
+      "verdict": "VERIFIED",
+      "evidenceClass": "official-product-doc",
+      "sources": [
+        {
+          "title": "Hooks - PreCompact",
+          "url": "https://learn.chatgpt.com/docs/hooks#precompact",
+          "publishedOrUpdated": "current documentation",
+          "accessed": "2026-07-18"
+        },
+        {
+          "title": "Hooks - PostCompact",
+          "url": "https://learn.chatgpt.com/docs/hooks#postcompact",
+          "publishedOrUpdated": "current documentation",
+          "accessed": "2026-07-18"
+        }
+      ],
+      "counterevidence": "Neither event documents an action for inspecting the opaque compacted state.",
+      "productDecision": "Snapshot before compaction and measure the event afterward; do not promise semantic inspection or rollback of native compaction."
+    },
+    {
+      "id": "CG-004",
+      "claim": "Current Codex hook execution supports command handlers; prompt and agent handlers are parsed but skipped, and async command hooks are unsupported.",
+      "verdict": "VERIFIED",
+      "evidenceClass": "official-product-doc",
+      "sources": [
+        {
+          "title": "OpenAI Codex Hooks - config shape",
+          "url": "https://learn.chatgpt.com/docs/hooks#config-shape",
+          "publishedOrUpdated": "current documentation",
+          "accessed": "2026-07-18"
+        }
+      ],
+      "counterevidence": "Future Codex releases may broaden handler support.",
+      "productDecision": "Implement synchronous command hooks and gate compatibility by tested Codex versions."
+    },
+    {
+      "id": "CG-005",
+      "claim": "The transcript_path hook field points to a transcript whose format is not a stable hook interface.",
+      "verdict": "VERIFIED",
+      "evidenceClass": "official-product-doc",
+      "sources": [
+        {
+          "title": "Hooks - common input fields",
+          "url": "https://learn.chatgpt.com/docs/hooks#common-input-fields",
+          "publishedOrUpdated": "current documentation",
+          "accessed": "2026-07-18"
+        }
+      ],
+      "counterevidence": "A format can remain unchanged for several releases without becoming a supported contract.",
+      "productDecision": "Use a versioned tolerant adapter, preserve unknown records, and fail closed on unsupported schemas."
+    },
+    {
+      "id": "CG-006",
+      "claim": "A normal plugin hook can directly start native compaction in an arbitrary existing Codex Desktop or CLI thread.",
+      "verdict": "UNKNOWN",
+      "evidenceClass": "official-doc-gap",
+      "sources": [
+        {
+          "title": "OpenAI Codex Hooks",
+          "url": "https://learn.chatgpt.com/docs/hooks",
+          "publishedOrUpdated": "current documentation",
+          "accessed": "2026-07-18"
+        },
+        {
+          "title": "OpenAI Codex configuration reference",
+          "url": "https://learn.chatgpt.com/docs/config-file/config-reference#configtoml",
+          "publishedOrUpdated": "current documentation",
+          "accessed": "2026-07-18"
+        }
+      ],
+      "counterevidence": "The documented PreCompact surface can veto but has no start-compaction action; documented thresholds are configuration values.",
+      "productDecision": "Do not ship or advertise plugin-driven native actuation in P0."
+    },
+    {
+      "id": "CG-007",
+      "claim": "A client that owns a Codex app-server thread can request thread/compact/start and observe contextCompaction lifecycle items.",
+      "verdict": "VERIFIED",
+      "evidenceClass": "official-source-doc",
+      "sources": [
+        {
+          "title": "OpenAI codex app-server README",
+          "url": "https://github.com/openai/codex/blob/main/codex-rs/app-server/README.md",
+          "publishedOrUpdated": "main branch",
+          "accessed": "2026-07-18"
+        }
+      ],
+      "counterevidence": "This does not grant control over a thread owned by another client, and parts of app-server transport are experimental.",
+      "productDecision": "Keep app-server actuation as an opt-in, version-pinned experimental adapter."
+    },
+    {
+      "id": "CG-008",
+      "claim": "Codex exposes static auto-compaction threshold and scope configuration.",
+      "verdict": "VERIFIED",
+      "evidenceClass": "official-product-doc",
+      "sources": [
+        {
+          "title": "OpenAI Codex configuration reference",
+          "url": "https://learn.chatgpt.com/docs/config-file/config-reference#configtoml",
+          "publishedOrUpdated": "current documentation",
+          "accessed": "2026-07-18"
+        }
+      ],
+      "counterevidence": "A config value does not establish safe dynamic mutation during a live thread.",
+      "productDecision": "Read configuration for simulation context; do not rewrite user configuration automatically."
+    },
+    {
+      "id": "CG-009",
+      "claim": "OpenAI Responses compaction returns an opaque encrypted compaction item that carries forward state using fewer tokens.",
+      "verdict": "VERIFIED",
+      "evidenceClass": "official-api-doc",
+      "sources": [
+        {
+          "title": "OpenAI Compaction guide",
+          "url": "https://developers.openai.com/api/docs/guides/compaction",
+          "publishedOrUpdated": "current documentation",
+          "accessed": "2026-07-18"
+        }
+      ],
+      "counterevidence": "Opaque continuation does not prove retention of every exact fact or downstream task quality.",
+      "productDecision": "Evaluate compaction behavior through hidden task tests and exact invariant probes, not content inspection."
+    },
+    {
+      "id": "CG-010",
+      "claim": "OpenAI prompt-cache hits depend on exact prefix matches, and API responses report cached-token and GPT-5.6-family cache-write categories.",
+      "verdict": "VERIFIED",
+      "evidenceClass": "official-api-doc",
+      "sources": [
+        {
+          "title": "OpenAI Prompt Caching guide",
+          "url": "https://developers.openai.com/api/docs/guides/prompt-caching",
+          "publishedOrUpdated": "current documentation",
+          "accessed": "2026-07-18"
+        }
+      ],
+      "counterevidence": "API prompt-caching accounting does not prove identical accounting for ChatGPT-authenticated Codex sessions.",
+      "productDecision": "Track cache categories when reported and label all parity assumptions explicitly."
+    },
+    {
+      "id": "CG-011",
+      "claim": "Codex usage is determined by prompt length alone.",
+      "verdict": "REJECTED",
+      "evidenceClass": "official-product-doc",
+      "sources": [
+        {
+          "title": "Codex pricing - usage limits",
+          "url": "https://learn.chatgpt.com/docs/pricing#what-are-the-usage-limits-for-my-plan",
+          "publishedOrUpdated": "current documentation",
+          "accessed": "2026-07-18"
+        }
+      ],
+      "counterevidence": "OpenAI states that model, context, reasoning, tool use, retrieval, caching, task size, and task duration all affect usage.",
+      "productDecision": "Report disaggregated usage signals and never infer efficiency from prompt length alone."
+    },
+    {
+      "id": "CG-012",
+      "claim": "There is a public deterministic conversion from local ChatGPT-authenticated Codex token events to actual credits charged per run.",
+      "verdict": "UNKNOWN",
+      "evidenceClass": "official-doc-gap",
+      "sources": [
+        {
+          "title": "Codex pricing",
+          "url": "https://learn.chatgpt.com/docs/pricing",
+          "publishedOrUpdated": "current documentation",
+          "accessed": "2026-07-18"
+        },
+        {
+          "title": "Work mode admin FAQ - usage and cost",
+          "url": "https://learn.chatgpt.com/docs/enterprise/work-admin-faq#how-does-work-mode-usage-translate-into-spend-over-time",
+          "publishedOrUpdated": "current documentation",
+          "accessed": "2026-07-18"
+        }
+      ],
+      "counterevidence": "The inspected official docs describe variable usage and warn against exact workflow attribution from aggregate analytics; no conversion formula is given.",
+      "productDecision": "Set estimatedCredits to null for ChatGPT-login runs; expose weightedTokenProxy and optional estimatedApiEquivalentUsd."
+    },
+    {
+      "id": "CG-013",
+      "claim": "The periodic cost model C(L)=K/L+pg(L-1)/2 has a continuous stationary optimum L*=sqrt(2K/(pg)).",
+      "verdict": "INFERENCE",
+      "evidenceClass": "contextgc-derivation",
+      "sources": [
+        {
+          "title": "A First Order Approximation to the Optimum Checkpoint Interval",
+          "url": "https://doi.org/10.1145/361147.361115",
+          "publishedOrUpdated": "1974",
+          "accessed": "2026-07-18"
+        }
+      ],
+      "counterevidence": "The ContextGC equation is an engineering proxy, not Young's failure model and not a theorem about semantic quality. Nonstationary tasks can have no useful interior optimum.",
+      "productDecision": "Use it only as a baseline; add lifecycle boundaries, hysteresis, cooldown, and a safety cap."
+    },
+    {
+      "id": "CG-014",
+      "claim": "Checkpoint placement is an optimization trade-off among save cost, restore/rework cost, task duration, and failure behavior.",
+      "verdict": "VERIFIED",
+      "evidenceClass": "peer-reviewed-journal",
+      "sources": [
+        {
+          "title": "On the Optimum Checkpoint Selection Problem",
+          "url": "https://doi.org/10.1137/0213039",
+          "publishedOrUpdated": "1984",
+          "accessed": "2026-07-18"
+        }
+      ],
+      "counterevidence": "The source's explicit stochastic failure models do not match unknown semantic loss in coding agents.",
+      "productDecision": "Borrow the cost/recovery framing but fit no failure distribution in P0."
+    },
+    {
+      "id": "CG-015",
+      "claim": "Model Predictive Control depends on an explicit model and repeated finite-horizon optimization.",
+      "verdict": "VERIFIED",
+      "evidenceClass": "peer-reviewed-journal-survey",
+      "sources": [
+        {
+          "title": "Model predictive control: Theory and practice - A survey",
+          "url": "https://doi.org/10.1016/0005-1098(89)90002-2",
+          "publishedOrUpdated": "1989",
+          "accessed": "2026-07-18"
+        }
+      ],
+      "counterevidence": "The source does not say MPC is appropriate for LLM context management.",
+      "productDecision": "Defer MPC until transition and horizon forecasts are calibrated and beat the deterministic controller."
+    },
+    {
+      "id": "CG-016",
+      "claim": "A small additive KEEP/SUMMARIZE/EXTERNALIZE selection model with integer budgets can be solved exactly by discrete dynamic programming.",
+      "verdict": "INFERENCE",
+      "evidenceClass": "contextgc-formulation",
+      "sources": [
+        {
+          "title": "ContextGC decision brief - selection model",
+          "url": "./contextgc-decision-brief.md#54-selection-model",
+          "publishedOrUpdated": "2026-07-18",
+          "accessed": "2026-07-18"
+        }
+      ],
+      "counterevidence": "Exactness disappears if semantic utility is mismeasured or non-additive interactions are introduced.",
+      "productDecision": "Limit the exact claim to the declared finite optimization instance and expose inputs in the receipt."
+    },
+    {
+      "id": "CG-017",
+      "claim": "Classical submodular approximation guarantees apply to any ContextGC utility score without further proof.",
+      "verdict": "REJECTED",
+      "evidenceClass": "peer-reviewed-journal",
+      "sources": [
+        {
+          "title": "Best Algorithms for Approximating the Maximum of a Submodular Set Function",
+          "url": "https://doi.org/10.1287/moor.3.3.177",
+          "publishedOrUpdated": "1978",
+          "accessed": "2026-07-18"
+        }
+      ],
+      "counterevidence": "The guarantee requires a defined nondecreasing submodular objective and the stated constraint class; ContextGC has not established those properties.",
+      "productDecision": "Use deterministic heuristics or exact DP; advertise no generic submodular guarantee."
+    },
+    {
+      "id": "CG-018",
+      "claim": "Prompt compression has a task-dependent rate-distortion trade-off, and query-aware compression was important in the NeurIPS 2024 study.",
+      "verdict": "VERIFIED",
+      "evidenceClass": "peer-reviewed-conference",
+      "sources": [
+        {
+          "title": "Fundamental Limits of Prompt Compression: A Rate-Distortion Framework for Black-Box Language Models",
+          "url": "https://proceedings.neurips.cc/paper_files/paper/2024/hash/ac8fbba029dadca99d6b8c3f913d3ed6-Abstract-Conference.html",
+          "publishedOrUpdated": "NeurIPS 2024",
+          "accessed": "2026-07-18"
+        }
+      ],
+      "counterevidence": "Its distortion-rate optimum is defined for the paper's model/distribution and evaluated largely on synthetic and small natural-language data.",
+      "productDecision": "Define distortion through hidden task tests and exact invariants, not text similarity alone."
+    },
+    {
+      "id": "CG-019",
+      "claim": "RECOMP showed that end-task-trained retrieval compression and selective augmentation can greatly shorten retrieved context on its language-modeling and QA tasks.",
+      "verdict": "VERIFIED",
+      "evidenceClass": "peer-reviewed-conference",
+      "sources": [
+        {
+          "title": "RECOMP: Improving Retrieval-Augmented LMs with Compression and Selective Augmentation",
+          "url": "https://openreview.net/forum?id=mlJLVigNHp",
+          "publishedOrUpdated": "ICLR 2024",
+          "accessed": "2026-07-18"
+        }
+      ],
+      "counterevidence": "The evaluated tasks do not prove safe preservation of exact coding constraints or tool outcomes.",
+      "productDecision": "Require downstream coding-task success and forbid semantic compression of exact protected values."
+    },
+    {
+      "id": "CG-020",
+      "claim": "LongMemEval evaluates information extraction, multi-session reasoning, temporal reasoning, knowledge updates, and abstention over long interactive histories.",
+      "verdict": "VERIFIED",
+      "evidenceClass": "peer-reviewed-conference",
+      "sources": [
+        {
+          "title": "LongMemEval: Benchmarking Chat Assistants on Long-Term Interactive Memory",
+          "url": "https://openreview.net/forum?id=pZiyCaVuti",
+          "publishedOrUpdated": "ICLR 2025",
+          "accessed": "2026-07-18"
+        }
+      ],
+      "counterevidence": "It is conversational QA rather than a deterministic software-engineering benchmark.",
+      "productDecision": "Borrow update, temporal, and abstention dimensions while using coding fixtures with hidden graders."
+    },
+    {
+      "id": "CG-021",
+      "claim": "Conformal Risk Control can control expected bounded monotone losses under its calibration assumptions.",
+      "verdict": "VERIFIED",
+      "evidenceClass": "peer-reviewed-conference",
+      "sources": [
+        {
+          "title": "Conformal Risk Control",
+          "url": "https://openreview.net/forum?id=33XGfHLtZg",
+          "publishedOrUpdated": "ICLR 2024",
+          "accessed": "2026-07-18"
+        }
+      ],
+      "counterevidence": "A semantic coding-loss proxy may be non-monotone, and exchangeability between calibration and future coding trajectories is unproven.",
+      "productDecision": "Make no conformal guarantee in P0; first collect independent labeled trajectories and validate the loss family."
+    },
+    {
+      "id": "CG-022",
+      "claim": "Learn then Test provides a finite-sample parameter-calibration framework through multiple hypothesis testing.",
+      "verdict": "VERIFIED",
+      "evidenceClass": "peer-reviewed-journal",
+      "sources": [
+        {
+          "title": "Learn then Test: Calibrating Predictive Algorithms to Achieve Risk Control",
+          "url": "https://doi.org/10.1214/24-AOAS1998",
+          "publishedOrUpdated": "Annals of Applied Statistics 2025",
+          "accessed": "2026-07-18"
+        }
+      ],
+      "counterevidence": "Three handcrafted fixtures do not provide a credible independent calibration and test population.",
+      "productDecision": "Freeze thresholds before confirmatory local replay, but call this preregistration rather than statistical certification."
+    },
+    {
+      "id": "CG-023",
+      "claim": "Magic Context already implements cache-deferred reductions, tagged raw history, bounded expansion, background summarization, and structured facts.",
+      "verdict": "VERIFIED",
+      "evidenceClass": "official-project-repository",
+      "sources": [
+        {
+          "title": "Magic Context",
+          "url": "https://github.com/cortexkit/magic-context",
+          "publishedOrUpdated": "repository current as accessed",
+          "accessed": "2026-07-18"
+        }
+      ],
+      "counterevidence": "Repository documentation is maintained by the project and its performance claims are not independent evaluation.",
+      "productDecision": "Reject novelty based on cache awareness, raw expansion, tiering, or background history compression alone."
+    },
+    {
+      "id": "CG-024",
+      "claim": "LCM proposes a hierarchical summary DAG with pointers to original material for targeted retrieval.",
+      "verdict": "VERIFIED",
+      "evidenceClass": "preprint",
+      "sources": [
+        {
+          "title": "LCM: Lossless Context Management",
+          "url": "https://arxiv.org/abs/2605.04050",
+          "publishedOrUpdated": "2026 preprint",
+          "accessed": "2026-07-18"
+        }
+      ],
+      "counterevidence": "The label lossless concerns raw retrievability; the active summary can still omit semantic detail, and benchmark claims are author-reported.",
+      "productDecision": "Describe ContextGC archives as byte-recoverable, never its summaries as lossless."
+    },
+    {
+      "id": "CG-025",
+      "claim": "Hermes Agent already supports threshold compression, a pluggable context engine, and native Codex app-server compaction modes.",
+      "verdict": "VERIFIED",
+      "evidenceClass": "official-project-doc",
+      "sources": [
+        {
+          "title": "Hermes Agent context compression and caching",
+          "url": "https://github.com/NousResearch/hermes-agent/blob/main/website/docs/developer-guide/context-compression-and-caching.md",
+          "publishedOrUpdated": "repository current as accessed",
+          "accessed": "2026-07-18"
+        },
+        {
+          "title": "Hermes Codex app-server runtime",
+          "url": "https://hermes-agent.nousresearch.com/docs/user-guide/features/codex-app-server-runtime",
+          "publishedOrUpdated": "current documentation",
+          "accessed": "2026-07-18"
+        }
+      ],
+      "counterevidence": "Hermes owns a different agent/runtime surface from an installable pure Codex plugin.",
+      "productDecision": "Differentiate through native plugin lifecycle receipts and invariant gates, not auto-compaction itself."
+    },
+    {
+      "id": "CG-026",
+      "claim": "GitHub Copilot CLI automatically compacts long sessions and explicitly documents that fine-grained details may be lost.",
+      "verdict": "VERIFIED",
+      "evidenceClass": "official-product-doc",
+      "sources": [
+        {
+          "title": "Managing context in GitHub Copilot CLI",
+          "url": "https://docs.github.com/en/copilot/concepts/agents/copilot-cli/context-management",
+          "publishedOrUpdated": "current documentation",
+          "accessed": "2026-07-18"
+        }
+      ],
+      "counterevidence": "The documented thresholds and behavior apply to Copilot CLI, not Codex.",
+      "productDecision": "Make loss risk visible and demonstrate exact-source recovery rather than implying summaries preserve everything."
+    },
+    {
+      "id": "CG-027",
+      "claim": "Claude Code supports automatic and manual compaction and documents which instruction surfaces survive or may be lost.",
+      "verdict": "VERIFIED",
+      "evidenceClass": "official-product-doc",
+      "sources": [
+        {
+          "title": "Claude Code context window",
+          "url": "https://code.claude.com/docs/en/context-window",
+          "publishedOrUpdated": "current documentation",
+          "accessed": "2026-07-18"
+        }
+      ],
+      "counterevidence": "Claude Code behavior does not establish Codex behavior.",
+      "productDecision": "Treat durable invariant reinjection as established practice rather than novelty."
+    },
+    {
+      "id": "CG-028",
+      "claim": "Letta already provides always-visible structured memory blocks and separate archival memory/search.",
+      "verdict": "VERIFIED",
+      "evidenceClass": "official-project-doc",
+      "sources": [
+        {
+          "title": "Letta memory blocks",
+          "url": "https://docs.letta.com/guides/core-concepts/memory/memory-blocks",
+          "publishedOrUpdated": "current documentation",
+          "accessed": "2026-07-18"
+        },
+        {
+          "title": "Letta resources for agents - archival memory",
+          "url": "https://docs.letta.com/guides/get-started/for-agents",
+          "publishedOrUpdated": "current documentation",
+          "accessed": "2026-07-18"
+        }
+      ],
+      "counterevidence": "Letta is a stateful agent platform, not a Codex-native plugin.",
+      "productDecision": "Do not claim first typed or tiered agent memory."
+    },
+    {
+      "id": "CG-029",
+      "claim": "LangGraph already supports durable checkpoints, replay, fork/time travel, and short/long-term memory stores.",
+      "verdict": "VERIFIED",
+      "evidenceClass": "official-project-doc",
+      "sources": [
+        {
+          "title": "LangGraph persistence",
+          "url": "https://docs.langchain.com/oss/python/langgraph/persistence",
+          "publishedOrUpdated": "current documentation",
+          "accessed": "2026-07-18"
+        }
+      ],
+      "counterevidence": "LangGraph checkpoints apply to graphs built on that runtime, not arbitrary Codex threads.",
+      "productDecision": "Differentiate on Codex integration and auditability, not checkpoint/replay as a general concept."
+    },
+    {
+      "id": "CG-030",
+      "claim": "TokenPilot studies cache-efficient, lifecycle-aware context management for long-running agents.",
+      "verdict": "VERIFIED",
+      "evidenceClass": "preprint",
+      "sources": [
+        {
+          "title": "TokenPilot: Cache-Efficient Context Management for LLM Agents",
+          "url": "https://arxiv.org/abs/2606.17016",
+          "publishedOrUpdated": "June 2026 preprint",
+          "accessed": "2026-07-18"
+        },
+        {
+          "title": "LightMem2 TokenPilot component",
+          "url": "https://github.com/zjunlp/LightMem2/tree/main/components/tokenpilot",
+          "publishedOrUpdated": "repository current as accessed",
+          "accessed": "2026-07-18"
+        }
+      ],
+      "counterevidence": "Reported savings are author-reported and benchmark-specific.",
+      "productDecision": "Reject novelty based only on cache-aware timing or lifecycle eviction."
+    },
+    {
+      "id": "CG-031",
+      "claim": "ACON reports optimizing compression guidelines from full-context-success versus compressed-context-failure trajectories and reducing peak tokens on its tasks.",
+      "verdict": "VERIFIED",
+      "evidenceClass": "preprint-author-reported",
+      "sources": [
+        {
+          "title": "ACON: Optimizing Context Compression for Long-horizon LLM Agents",
+          "url": "https://arxiv.org/abs/2510.00615",
+          "publishedOrUpdated": "2025 preprint",
+          "accessed": "2026-07-18"
+        }
+      ],
+      "counterevidence": "The paper reports compressor overhead, limited model coverage, and benchmark-specific results; the numbers are not ContextGC evidence.",
+      "productDecision": "Use paired failures as research inspiration, but ship a deterministic controller and local receipts."
+    },
+    {
+      "id": "CG-032",
+      "claim": "SWE-MeM trains coding agents to choose when, what, and how to compress long trajectories.",
+      "verdict": "VERIFIED",
+      "evidenceClass": "preprint-author-reported",
+      "sources": [
+        {
+          "title": "SWE-MeM: Learning Adaptive Memory Management for Long-Horizon Coding Agents",
+          "url": "https://arxiv.org/abs/2606.28434",
+          "publishedOrUpdated": "June 2026 preprint",
+          "accessed": "2026-07-18"
+        }
+      ],
+      "counterevidence": "Results are author-reported and require training; they do not validate an untrained Codex plugin controller.",
+      "productDecision": "Reject novelty based only on adaptive memory actions for coding agents."
+    },
+    {
+      "id": "CG-033",
+      "claim": "MAGE (Memory as Agent-Guided Exploration) proposes hierarchical execution-state trees with grow, compress, maintain, and revise operations.",
+      "verdict": "VERIFIED",
+      "evidenceClass": "preprint-author-reported",
+      "sources": [
+        {
+          "title": "Beyond Semantic Organization: Memory as Execution State Management for Long-Horizon Agents",
+          "url": "https://arxiv.org/abs/2606.06090",
+          "publishedOrUpdated": "June 2026 preprint",
+          "accessed": "2026-07-18"
+        }
+      ],
+      "counterevidence": "The MAGE acronym is also used by unrelated papers; the cited meaning must be spelled out, and results are author-reported.",
+      "productDecision": "Describe Task Frame lineage precisely and avoid acronym-only comparisons."
+    },
+    {
+      "id": "CG-034",
+      "claim": "ContextGC is the world's first automatic, cache-aware, reversible context manager for coding agents.",
+      "verdict": "REJECTED",
+      "evidenceClass": "multi-source-prior-art",
+      "sources": [
+        {
+          "title": "Magic Context",
+          "url": "https://github.com/cortexkit/magic-context",
+          "publishedOrUpdated": "repository current as accessed",
+          "accessed": "2026-07-18"
+        },
+        {
+          "title": "TokenPilot",
+          "url": "https://arxiv.org/abs/2606.17016",
+          "publishedOrUpdated": "June 2026 preprint",
+          "accessed": "2026-07-18"
+        },
+        {
+          "title": "SWE-MeM",
+          "url": "https://arxiv.org/abs/2606.28434",
+          "publishedOrUpdated": "June 2026 preprint",
+          "accessed": "2026-07-18"
+        }
+      ],
+      "counterevidence": "Each major component of that claim has explicit prior art.",
+      "productDecision": "Claim only the Codex-specific combination of invariant gates, provenance, receipts, and reversible archives."
+    },
+    {
+      "id": "CG-035",
+      "claim": "ContextGC compression is lossless and never forgets.",
+      "verdict": "REJECTED",
+      "evidenceClass": "mechanism-and-product-counterevidence",
+      "sources": [
+        {
+          "title": "OpenAI Compaction guide",
+          "url": "https://developers.openai.com/api/docs/guides/compaction",
+          "publishedOrUpdated": "current documentation",
+          "accessed": "2026-07-18"
+        },
+        {
+          "title": "GitHub Copilot CLI context management",
+          "url": "https://docs.github.com/en/copilot/concepts/agents/copilot-cli/context-management#what-compaction-does-not-preserve",
+          "publishedOrUpdated": "current documentation",
+          "accessed": "2026-07-18"
+        }
+      ],
+      "counterevidence": "Summaries can omit fine detail and native compaction is opaque. Only separately archived bytes can be proven recoverable.",
+      "productDecision": "Use 'byte-recoverable archive' and report retention tests; never use lossless for active summaries."
+    },
+    {
+      "id": "CG-036",
+      "claim": "Usage Proxy per Verified Success is an established externally validated measure of Codex credits.",
+      "verdict": "REJECTED",
+      "evidenceClass": "contextgc-metric-boundary",
+      "sources": [
+        {
+          "title": "Codex pricing - usage limits",
+          "url": "https://learn.chatgpt.com/docs/pricing#what-are-the-usage-limits-for-my-plan",
+          "publishedOrUpdated": "current documentation",
+          "accessed": "2026-07-18"
+        }
+      ],
+      "counterevidence": "UPVS is a ContextGC experiment metric with frozen weights; it is not a credit receipt or a published OpenAI billing metric.",
+      "productDecision": "Label UPVS as a comparative proxy and always show raw token categories."
+    }
+  ],
+  "residualUnknowns": [
+    {
+      "id": "U-001",
+      "question": "Will OpenAI expose authoritative per-run credits for ChatGPT-authenticated Codex?",
+      "impact": "Blocks exact-credit optimization and savings claims."
+    },
+    {
+      "id": "U-002",
+      "question": "Which transcript record shapes remain compatible across the intended Codex release range?",
+      "impact": "Requires compatibility fixtures and fail-closed adapters."
+    },
+    {
+      "id": "U-003",
+      "question": "Can a supported plugin API initiate native compaction in an existing host-owned thread in a future Codex release?",
+      "impact": "Determines whether P0 advisory behavior can later become native actuation."
+    },
+    {
+      "id": "U-004",
+      "question": "Do atom utility and risk scores predict hidden coding-task success on independent tasks?",
+      "impact": "Blocks semantic-optimality and calibrated-risk claims."
+    },
+    {
+      "id": "U-005",
+      "question": "Does cache accounting in ChatGPT-authenticated Codex follow the public API prompt-caching schedule closely enough for economic decisions?",
+      "impact": "Blocks transfer of API cache-cost calculations to local subscription usage."
+    },
+    {
+      "id": "U-006",
+      "question": "Is there enough independent trajectory data to justify conformal or Learn-then-Test calibration?",
+      "impact": "P0 must use deterministic safety gates instead of statistical guarantees."
+    }
+  ],
+  "claimPolicy": {
+    "allowedTemplate": "ContextGC is a Codex-specific, invariant-gated and reversible context controller. In frozen local traces it changed a declared weighted token proxy while preserving every critical fixture invariant.",
+    "prohibitedPhrases": [
+      "world first automatic compaction",
+      "lossless context compression",
+      "never forgets",
+      "mathematically optimal",
+      "exact Codex credits saved",
+      "quality preserved without task evaluation",
+      "works with every Codex version"
+    ]
+  }
+}

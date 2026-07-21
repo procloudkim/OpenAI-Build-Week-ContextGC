@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "fixtureId": "noisy-incident-debug",
+  "expectedTurnCount": 12,
+  "requiredFacts": [
+    {"id": "incident_id", "expectedValue": "INC-4821"},
+    {"id": "correlation_header", "expectedValue": "X-Request-Id"},
+    {"id": "correlation_value", "expectedValue": "req_01J2F8Y7K3"},
+    {"id": "root_cause", "expectedValue": "A proxy lowercased the request-id lookup key"},
+    {"id": "fix_location", "expectedValue": "src/http/correlation.ts"},
+    {"id": "no_charge_retry", "expectedValue": "Never replay POST /charge in production"}
+  ],
+  "requiredUses": [
+    {"turnId": "t12", "factId": "incident_id", "expectedValue": "INC-4821", "requireExact": true},
+    {"turnId": "t11", "factId": "correlation_header", "expectedValue": "X-Request-Id", "requireExact": true},
+    {"turnId": "t12", "factId": "correlation_value", "expectedValue": "req_01J2F8Y7K3", "requireExact": true},
+    {"turnId": "t11", "factId": "root_cause", "expectedValue": "A proxy lowercased the request-id lookup key", "requireExact": false},
+    {"turnId": "t12", "factId": "fix_location", "expectedValue": "src/http/correlation.ts", "requireExact": true},
+    {"turnId": "t10", "factId": "no_charge_retry", "expectedValue": "Never replay POST /charge in production", "requireExact": false}
+  ],
+  "forbiddenChanges": ["production:POST /charge"]
+}

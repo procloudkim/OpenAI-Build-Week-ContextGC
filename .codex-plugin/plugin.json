@@ -1,0 +1,35 @@
+{
+  "name": "context-gc",
+  "version": "0.1.5",
+  "description": "Local-first, reversible task-context checkpoints for Codex.",
+  "author": {
+    "name": "ContextGC Contributors"
+  },
+  "homepage": "https://github.com/procloudkim/OpenAI-Build-Week-ContextGC#readme",
+  "repository": "https://github.com/procloudkim/OpenAI-Build-Week-ContextGC",
+  "license": "MIT",
+  "keywords": [
+    "codex",
+    "context",
+    "checkpoint",
+    "developer-tools"
+  ],
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "ContextGC",
+    "shortDescription": "Reversible task-context checkpoints for Codex",
+    "longDescription": "Protect important goals, constraints, decisions, and evidence around Codex compaction with bounded context injection, local checkpoints, selective rehydration, restore, and auditable receipts.",
+    "developerName": "ContextGC Contributors",
+    "category": "Developer Tools",
+    "capabilities": [
+      "Interactive",
+      "Write"
+    ],
+    "defaultPrompt": [
+      "Checkpoint this Codex task before compaction.",
+      "Show the current context risk and protected invariants.",
+      "Restore a checkpoint and rehydrate only the evidence I need."
+    ]
+  }
+}
