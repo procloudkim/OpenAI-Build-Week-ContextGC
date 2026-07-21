@@ -4,6 +4,14 @@ All notable ContextGC changes are recorded here. Dates use ISO 8601.
 
 ## Unreleased
 
+## [0.1.8] - 2026-07-21
+
+### Fixed
+
+- Record the actual freshness advisory in both `hook.pre-compact` and
+  `hook.post-compact` ledger events. The fallback behavior shipped in `0.1.7`
+  is unchanged; the audit trail now agrees across the lifecycle boundary.
+
 ## [0.1.7] - 2026-07-21
 
 ### Fixed

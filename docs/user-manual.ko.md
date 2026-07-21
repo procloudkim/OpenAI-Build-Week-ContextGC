@@ -1,6 +1,6 @@
 # ContextGC 사용자 매뉴얼
 
-> 적용 버전: ContextGC 0.1.7
+> 적용 버전: ContextGC 0.1.8
 > 검증 환경: Windows PowerShell, Node.js 22.13 이상, Codex CLI 0.144.5
 > 문서 검증일: 2026-07-19
 
@@ -130,7 +130,7 @@ codex plugin list
 기대 결과:
 
 ```text
-context-gc@context-gc-local  installed, enabled  0.1.7
+context-gc@context-gc-local  installed, enabled  0.1.8
 ```
 
 이미 같은 로컬 marketplace가 등록되어 있다면 중복 추가 오류가 날 수
@@ -475,7 +475,7 @@ finally {
 }
 ```
 
-ContextGC 0.1.7의 기대 결과는 다음과 같습니다.
+ContextGC 0.1.8의 기대 결과는 다음과 같습니다.
 
 ```text
 ok                    : True

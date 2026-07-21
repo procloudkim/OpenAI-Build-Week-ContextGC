@@ -1,6 +1,6 @@
 # Install ContextGC
 
-ContextGC `0.1.7` is a prebuilt Codex plugin for Node.js 22.13 or newer. No
+ContextGC `0.1.8` is a prebuilt Codex plugin for Node.js 22.13 or newer. No
 TypeScript build or separate OpenAI API key is required for normal plugin use.
 
 ## Before installation
@@ -23,7 +23,7 @@ codex plugin list
 Expected observable: the list contains:
 
 ```text
-context-gc@context-gc-local  installed, enabled  0.1.7
+context-gc@context-gc-local  installed, enabled  0.1.8
 ```
 
 If you already have the clone, run the final three commands from its root.
@@ -78,7 +78,7 @@ Confirm all of these before treating the setup as complete:
   `latestCheckpointStatus: verified`;
 - a new thread loads only the bounded, integrity-verified Task Frame.
 
-Preserve important checkpoint UUIDs. ContextGC `0.1.7` does not expose a public
+Preserve important checkpoint UUIDs. ContextGC `0.1.8` does not expose a public
 checkpoint-list command.
 
 On an empty store, the first writable user turn may request one bootstrap

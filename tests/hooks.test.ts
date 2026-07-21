@@ -587,8 +587,17 @@ test("automatic PreCompact preserves a verified fallback without interrupting st
   assert.doesNotMatch(postCompact.stdout, /STALE|automatic compaction paused/iu);
   assertNoticeBudget(postCompact.output?.systemMessage);
 
-  const ledger = await readFile(resolve(root, "events.jsonl"), "utf8");
-  assert.match(ledger, /"checkpointReviewDue":true/u);
+  const ledger = (await readFile(resolve(root, "events.jsonl"), "utf8"))
+    .trim()
+    .split("\n")
+    .map((line) => JSON.parse(line) as {
+      type?: string;
+      payload?: { checkpointReviewDue?: boolean };
+    });
+  const preCompactEvent = ledger.find((event) => event.type === "hook.pre-compact");
+  const postCompactEvent = ledger.find((event) => event.type === "hook.post-compact");
+  assert.equal(preCompactEvent?.payload?.checkpointReviewDue, true);
+  assert.equal(postCompactEvent?.payload?.checkpointReviewDue, true);
 });
 
 test("automatic PreCompact fails closed when snapshot or hook-state storage is unavailable", async () => {

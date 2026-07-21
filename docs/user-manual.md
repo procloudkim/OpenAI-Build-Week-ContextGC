@@ -4,7 +4,7 @@
 
 | Field | Value |
 | --- | --- |
-| Product | ContextGC 0.1.7 |
+| Product | ContextGC 0.1.8 |
 | Manual type | Windows installation and operations tutorial |
 | Target reader | A Windows Codex user installing ContextGC from its public repository |
 | Reader job | Install ContextGC, trust it deliberately, create and recover a task-context checkpoint, and manage the installation without confusing context recovery with source-code recovery |
@@ -432,7 +432,7 @@ $Adaptive = $Result.data.aggregates | Where-Object policy -eq "A_ADAPTIVE"
 } | Format-List
 ```
 
-For ContextGC 0.1.7 with the checked-in fixtures, the exact observable is:
+For ContextGC 0.1.8 with the checked-in fixtures, the exact observable is:
 
 ```text
 ok                          : True

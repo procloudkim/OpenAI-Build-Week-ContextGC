@@ -4,7 +4,7 @@
 
 - **Audience:** users and maintainers who need exact commands, inputs, side
   effects, limits, and compatibility boundaries.
-- **Scope:** ContextGC `0.1.7` as verified on 2026-07-21.
+- **Scope:** ContextGC `0.1.8` as verified on 2026-07-21.
 - **Command convention:** user-facing CLI examples invoke the checked-in bundle
   with `node scripts/contextgc.bundle.mjs`. A bare `contextgc` command is
   available only in a development installation that explicitly links the npm
@@ -16,7 +16,7 @@
 
 | Component | Verified or supported range | Behavior outside the range |
 | --- | --- | --- |
-| ContextGC | `0.1.7` | Recheck this reference and release notes |
+| ContextGC | `0.1.8` | Recheck this reference and release notes |
 | Node.js | `>=22.13.0`; verified with `24.18.0` | Package engine is unsupported |
 | npm | Verified with `11.16.0` | Use the lockfile-compatible npm shipped with a supported Node release |
 | Codex CLI installation/discovery | Verified with `0.144.5` | Re-run plugin, MCP, skill, and hook discovery checks |
@@ -202,7 +202,7 @@ session report. Use `--receipt <path>` when provenance must be explicit.
   frame.
 - **Restore:** select one known checkpoint as the latest frame mirror.
 - **Rollback:** operational shorthand for restoring a previously recorded
-  checkpoint ID. ContextGC `0.1.7` has no public checkpoint-list command, so
+  checkpoint ID. ContextGC `0.1.8` has no public checkpoint-list command, so
   preserve important returned IDs.
 
 ## Plugin lifecycle commands
