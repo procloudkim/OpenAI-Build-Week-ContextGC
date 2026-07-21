@@ -4,6 +4,19 @@ All notable ContextGC changes are recorded here. Dates use ISO 8601.
 
 ## Unreleased
 
+## [0.1.7] - 2026-07-21
+
+### Fixed
+
+- Treat checkpoint freshness as an advisory coverage signal instead of an
+  integrity failure. Automatic `PreCompact` now preserves a byte-verified
+  fallback snapshot and proceeds, so six tool events or twenty minutes of work
+  cannot interrupt the conversation.
+- Keep fail-closed blocking for missing or invalid checkpoints and failed
+  snapshot or hook-state persistence. When the preserved fallback predates
+  recent work, `PostCompact` reports the boundary in two short lines without
+  identifiers or local paths.
+
 ## [0.1.6] - 2026-07-21
 
 ### Changed

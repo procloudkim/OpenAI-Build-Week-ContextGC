@@ -23000,7 +23000,7 @@ var defaultRuntimeFactory = (options) => {
 };
 
 // dist/src/cli/version.js
-var CONTEXT_GC_VERSION = "0.1.6";
+var CONTEXT_GC_VERSION = "0.1.7";
 
 // dist/src/core/usage.js
 var DEFAULT_USAGE_WEIGHTS = Object.freeze({

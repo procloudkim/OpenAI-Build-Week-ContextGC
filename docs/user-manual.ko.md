@@ -1,6 +1,6 @@
 # ContextGC 사용자 매뉴얼
 
-> 적용 버전: ContextGC 0.1.6
+> 적용 버전: ContextGC 0.1.7
 > 검증 환경: Windows PowerShell, Node.js 22.13 이상, Codex CLI 0.144.5
 > 문서 검증일: 2026-07-19
 
@@ -130,7 +130,7 @@ codex plugin list
 기대 결과:
 
 ```text
-context-gc@context-gc-local  installed, enabled  0.1.6
+context-gc@context-gc-local  installed, enabled  0.1.7
 ```
 
 이미 같은 로컬 marketplace가 등록되어 있다면 중복 추가 오류가 날 수
@@ -199,6 +199,11 @@ Get-FileHash -LiteralPath '.\plugins\context-gc\hooks\hooks.json' -Algorithm SHA
 | `PreCompact` | 최신 체크포인트와 archive 무결성을 확인하고 보호 스냅샷 준비 |
 | `PostCompact` | 완료 경계를 기록하고 제한된 결과 알림을 한 번 표시 |
 | `Stop` | 메타데이터만 기록하고 모델 연속 턴은 만들지 않음 |
+
+freshness와 integrity는 구분됩니다. 오래됐지만 검증된 Task Frame은 복구용
+fallback으로 snapshot되며 자동 압축을 차단하지 않습니다. `PostCompact`는 최근
+작업이 Codex의 불투명한 native summary에 의존한다는 경계만 알립니다. checkpoint
+보호가 없거나 잘못됐거나 저장할 수 없을 때는 계속 fail-closed입니다.
 
 각 Windows 명령은 Node.js로 `${PLUGIN_ROOT}\hooks\run-hook.mjs`를 가져오며
 timeout은 5초입니다. `/hooks`에 표시된 명령, 이벤트와 matcher가 이 파일과
@@ -470,7 +475,7 @@ finally {
 }
 ```
 
-ContextGC 0.1.6의 기대 결과는 다음과 같습니다.
+ContextGC 0.1.7의 기대 결과는 다음과 같습니다.
 
 ```text
 ok                    : True

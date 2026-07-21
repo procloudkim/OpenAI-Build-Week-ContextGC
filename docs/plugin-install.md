@@ -1,6 +1,6 @@
 # Install ContextGC
 
-ContextGC `0.1.6` is a prebuilt Codex plugin for Node.js 22.13 or newer. No
+ContextGC `0.1.7` is a prebuilt Codex plugin for Node.js 22.13 or newer. No
 TypeScript build or separate OpenAI API key is required for normal plugin use.
 
 ## Before installation
@@ -23,7 +23,7 @@ codex plugin list
 Expected observable: the list contains:
 
 ```text
-context-gc@context-gc-local  installed, enabled  0.1.6
+context-gc@context-gc-local  installed, enabled  0.1.7
 ```
 
 If you already have the clone, run the final three commands from its root.
@@ -78,13 +78,18 @@ Confirm all of these before treating the setup as complete:
   `latestCheckpointStatus: verified`;
 - a new thread loads only the bounded, integrity-verified Task Frame.
 
-Preserve important checkpoint UUIDs. ContextGC `0.1.6` does not expose a public
+Preserve important checkpoint UUIDs. ContextGC `0.1.7` does not expose a public
 checkpoint-list command.
 
 On an empty store, the first writable user turn may request one bootstrap
 checkpoint without exposing a path. Plan mode defers that mutation for the
 turn. Automatic PreCompact remains fail-closed until checkpoint, snapshot, and
 hook-state persistence all verify.
+
+After setup, checkpoint freshness is advisory rather than blocking. If recent
+work outgrows the verified Task Frame, ContextGC snapshots that frame as a
+fallback, allows native compaction, and emits only a bounded coverage notice.
+Integrity or persistence failures still block automatic compaction.
 
 When updating from a markerless checkpoint created by an earlier build, legacy content is not
 injected. Create a new checkpoint only from currently verified facts and do not

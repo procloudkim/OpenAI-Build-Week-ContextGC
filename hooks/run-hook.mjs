@@ -7,7 +7,7 @@ import { dirname, isAbsolute, resolve } from "node:path";
 const STATE_SCHEMA_VERSION = 1;
 const FRAME_SCHEMA_VERSION = 1;
 const NOTICE_SCHEMA_VERSION = 1;
-const CONTEXT_GC_VERSION = "0.1.6";
+const CONTEXT_GC_VERSION = "0.1.7";
 const README_URL = "https://github.com/procloudkim/OpenAI-Build-Week-ContextGC#readme";
 const MAX_USER_NOTICE_CHARS = 240;
 const MAX_USER_NOTICE_LINES = 3;
@@ -363,7 +363,10 @@ async function onPreCompact({ input, root, sessionHash, turnHash, state, statePa
     state.toolEventsSinceCheckpoint > 0 &&
     (state.toolEventsSinceCheckpoint >= CHECKPOINT_TOOL_EVENT_LIMIT ||
       frameAgeMs >= CHECKPOINT_STALE_MS);
-  const frameProtectable = frameResult.valid && !checkpointReviewDue;
+  // Freshness is a coverage signal, not an integrity failure. A verified older
+  // checkpoint is still a valid recovery fallback, so preserve it and allow
+  // native compaction instead of deadlocking the conversation.
+  const frameProtectable = frameResult.valid;
   let snapshotWritten = false;
   let snapshotName = null;
 
@@ -396,6 +399,7 @@ async function onPreCompact({ input, root, sessionHash, turnHash, state, statePa
       frameBytes: frameResult.frameRef.bytes,
       snapshotName,
       capturedAt: new Date().toISOString(),
+      checkpointReviewDue,
     };
     const statePersisted = await writeState(statePath, state);
     await appendLedger(root, "hook.pre-compact", {
@@ -452,19 +456,17 @@ async function onPreCompact({ input, root, sessionHash, turnHash, state, statePa
     // Automatic compaction remains blocked on every retry until all three
     // invariants are established. The persisted turn marker changes only the
     // message; it never converts an unverified retry into permission.
-    const failureStatus = checkpointReviewDue
-      ? "CHECKPOINT_STALE"
-      : frameResult.valid
-        ? "SNAPSHOT_WRITE_FAILED"
-        : frameResult.status;
+    const failureStatus = frameResult.valid
+      ? "SNAPSHOT_WRITE_FAILED"
+      : frameResult.status;
     return autoCompactionBlocked(firstBlockForTurn, statePersisted, failureStatus);
   }
 
   return systemNotice([
     "ContextGC: manual compaction is not protected.",
-    checkpointReviewDue
-      ? "The checkpoint does not include recent work."
-      : "Checkpoint or snapshot integrity is incomplete.",
+    frameResult.valid
+      ? "A verified recovery snapshot could not be persisted."
+      : "Checkpoint integrity is incomplete.",
     `Guide: ${README_URL}`,
   ]);
 }
@@ -474,11 +476,9 @@ function autoCompactionBlocked(firstBlockForTurn, statePersisted, failureStatus)
   const retryLine = firstBlockForTurn
     ? `ContextGC: protection incomplete (${diagnostic}).`
     : "ContextGC: automatic compaction retry remains paused.";
-  const actionLine = failureStatus === "CHECKPOINT_STALE"
-    ? "Create or refresh one verified checkpoint, then retry."
-    : statePersisted
-      ? "Create or repair one verified checkpoint, then retry."
-      : "The hook state could not be persisted; protection remains fail-closed.";
+  const actionLine = statePersisted
+    ? "Create or repair one verified checkpoint, then retry."
+    : "The hook state could not be persisted; protection remains fail-closed.";
   return {
     continue: false,
     stopReason: userNotice([
@@ -541,6 +541,7 @@ async function onPostCompact({ input, root, sessionHash, turnHash, state, stateP
     trigger,
     pending,
   });
+  const checkpointReviewDue = pendingSnapshotVerified && pending?.checkpointReviewDue === true;
   state.lastCompactionAt = new Date().toISOString();
   state.lastCompactionTrigger = trigger;
   state.lastCompactionProtected = pendingSnapshotVerified;
@@ -556,9 +557,16 @@ async function onPostCompact({ input, root, sessionHash, turnHash, state, stateP
     turnHash,
     trigger,
     protectedSnapshotVerified: pendingSnapshotVerified,
+    checkpointReviewDue,
     statePersisted,
   });
   if (pendingSnapshotVerified && statePersisted) {
+    if (checkpointReviewDue) {
+      return systemNotice([
+        "ContextGC: compaction complete; verified fallback checkpoint preserved.",
+        "Recent work relies on Codex's opaque native summary; refresh when convenient.",
+      ]);
+    }
     return systemNotice([
       "ContextGC: protected compaction complete; Task Frame preserved; native summary opaque.",
     ]);
@@ -584,8 +592,9 @@ async function onStop({ input, root, sessionHash, turnHash, state, statePath }) 
   });
   // Stop is observability-only. It must never force another model turn merely
   // because tool-count or wall-clock thresholds were crossed. Safety review is
-  // deferred to the real PreCompact boundary, where stale work can be blocked
-  // without interrupting ordinary conversation.
+  // deferred to the real PreCompact boundary. That boundary blocks only when
+  // checkpoint, snapshot, or hook-state integrity is unavailable; semantic
+  // freshness remains advisory so ordinary conversation cannot deadlock.
   return undefined;
 }
 
@@ -1004,6 +1013,7 @@ function sanitizePendingPrecompact(value) {
   const frameBytes = boundedInteger(value.frameBytes, -1, MAX_CHECKPOINT_FRAME_BYTES);
   const snapshotName = safeSnapshotNameOrNull(value.snapshotName);
   const capturedAt = isoDateOrNull(value.capturedAt);
+  const checkpointReviewDue = value.checkpointReviewDue === true;
   if (
     turnHash === null ||
     trigger === null ||
@@ -1015,7 +1025,16 @@ function sanitizePendingPrecompact(value) {
   ) {
     return null;
   }
-  return { turnHash, trigger, checkpointId, frameHash, frameBytes, snapshotName, capturedAt };
+  return {
+    turnHash,
+    trigger,
+    checkpointId,
+    frameHash,
+    frameBytes,
+    snapshotName,
+    capturedAt,
+    checkpointReviewDue,
+  };
 }
 
 function isoDateOrNull(value) {
@@ -1256,7 +1275,6 @@ function publicFrameStatus(status) {
   ) {
     return "PROTECTION_INCOMPLETE";
   }
-  if (status === "CHECKPOINT_STALE") return "STALE";
   return "INVALID";
 }
 

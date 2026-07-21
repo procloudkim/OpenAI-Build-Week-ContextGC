@@ -77,9 +77,11 @@ The plugin combines a skill, MCP tools and trusted lifecycle hooks.
 - Plan mode emits a non-mutating defer notice and suppresses checkpoint
   reminders for that turn.
 - `Stop` records bounded metadata but never requests a model continuation.
-  Tool-count and elapsed-time pressure are enforced only at the real
-  `PreCompact` boundary: if recent work is not represented by the verified
-  checkpoint, automatic compaction fails closed and requests one refresh.
+  Tool-count and elapsed-time pressure are evaluated only at the real
+  `PreCompact` boundary. If recent work is not represented by the verified
+  checkpoint, freshness is recorded as an advisory coverage gap; the hook
+  preserves a byte-verified fallback and allows native compaction. Missing or
+  invalid checkpoints and failed snapshot/state persistence remain fail-closed.
 
 Every user-visible hook notice is limited to three lines and 240 characters.
 Healthy prompts, tools, and Stop events are silent. The full bounded Task Frame

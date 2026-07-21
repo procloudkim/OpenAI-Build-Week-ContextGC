@@ -4,7 +4,7 @@
 
 | Field | Value |
 | --- | --- |
-| Product | ContextGC 0.1.6 |
+| Product | ContextGC 0.1.7 |
 | Manual type | Windows installation and operations tutorial |
 | Target reader | A Windows Codex user installing ContextGC from its public repository |
 | Reader job | Install ContextGC, trust it deliberately, create and recover a task-context checkpoint, and manage the installation without confusing context recovery with source-code recovery |
@@ -189,6 +189,12 @@ The reviewed definition should contain these six lifecycle events:
 | `PreCompact` | Verify the latest checkpoint and write a reversible snapshot at the lifecycle boundary |
 | `PostCompact` | Record the completed boundary and show one bounded result notice |
 | `Stop` | Record metadata only; never force a model continuation |
+
+Freshness and integrity are separate. An older but verified Task Frame is
+snapshotted as a recovery fallback and does not block automatic compaction.
+`PostCompact` then states that recent work relies on Codex's opaque native
+summary. Missing, invalid, or unwritable checkpoint protection remains
+fail-closed.
 
 All commands should run the checked-in `hooks\run-hook.mjs` through Node and
 derive the script location from `PLUGIN_ROOT`. Do not trust the definition if
@@ -426,7 +432,7 @@ $Adaptive = $Result.data.aggregates | Where-Object policy -eq "A_ADAPTIVE"
 } | Format-List
 ```
 
-For ContextGC 0.1.6 with the checked-in fixtures, the exact observable is:
+For ContextGC 0.1.7 with the checked-in fixtures, the exact observable is:
 
 ```text
 ok                          : True

@@ -531,7 +531,7 @@ test("a successful restore reports its bounded recovery scope without identifier
   assertNoticeBudget(notice);
 });
 
-test("automatic PreCompact blocks only at the safety boundary when recent work outgrows the checkpoint", async () => {
+test("automatic PreCompact preserves a verified fallback without interrupting stale-checkpoint sessions", async () => {
   const root = await temporaryRoot();
   const runtime = new ContextGcRuntime({ dataDir: root });
   await runtime.createCheckpoint({ goal: "Protect work before native compaction" });
@@ -569,11 +569,26 @@ test("automatic PreCompact blocks only at the safety boundary when recent work o
     cwd: root,
     trigger: "auto",
   });
-  assert.equal(preCompact.output?.continue, false);
-  assert.match(preCompact.output?.stopReason ?? "", /STALE/u);
-  assert.match(preCompact.output?.systemMessage ?? "", /Create or refresh one verified checkpoint/iu);
-  assertNoticeBudget(preCompact.output?.stopReason);
-  assertNoticeBudget(preCompact.output?.systemMessage);
+  assert.equal(preCompact.output, null, preCompact.stderr);
+
+  const snapshots = await readdir(resolve(root, "hook-snapshots", shortHash(sessionId)));
+  assert.equal(snapshots.length, 1);
+
+  const postCompact = await invokeHook(root, {
+    hook_event_name: "PostCompact",
+    session_id: sessionId,
+    turn_id: "actual-auto-compact",
+    cwd: root,
+    trigger: "auto",
+  });
+  assert.equal(postCompact.output?.continue, true);
+  assert.match(postCompact.output?.systemMessage ?? "", /verified fallback checkpoint preserved/iu);
+  assert.match(postCompact.output?.systemMessage ?? "", /opaque native summary/iu);
+  assert.doesNotMatch(postCompact.stdout, /STALE|automatic compaction paused/iu);
+  assertNoticeBudget(postCompact.output?.systemMessage);
+
+  const ledger = await readFile(resolve(root, "events.jsonl"), "utf8");
+  assert.match(ledger, /"checkpointReviewDue":true/u);
 });
 
 test("automatic PreCompact fails closed when snapshot or hook-state storage is unavailable", async () => {

@@ -62,7 +62,7 @@ Expected observable: the JSON contains both `context-gc` and `ContextGC` skill
 metadata. This command is an experimental diagnostic surface, not a stable user
 API.
 
-If metadata is absent, confirm plugin version `0.1.6`, reinstall, and start a
+If metadata is absent, confirm plugin version `0.1.7`, reinstall, and start a
 new thread. Do not manually overwrite the installed cache.
 
 ### Reinstall fails with Windows `Access denied`
@@ -179,6 +179,14 @@ PreCompact remains blocked on every retry until a checkpoint, snapshot, and
 hook-state update all verify. Manual compact is explicitly unprotected if those
 invariants fail.
 
+### Automatic compact reports `STALE` after ordinary tool use
+
+This was a `0.1.6` liveness regression: six tool events or twenty minutes could
+turn checkpoint freshness into a blocking integrity verdict. Upgrade to
+`0.1.7`. The corrected hook snapshots the verified older Task Frame, allows
+native compaction, and reports the recent-work coverage gap without interrupting
+the conversation. Missing, invalid, or unwritable recovery state still blocks.
+
 ### Transcript telemetry is unsupported
 
 ContextGC accepts only guarded transcript schemas for Codex `0.144.x` and
@@ -232,7 +240,7 @@ These commands do not delete checkpoints. Before deleting stored data:
    shared output;
 5. delete only that reviewed directory using your normal OS workflow.
 
-ContextGC intentionally has no recursive-delete command in release `0.1.6`.
+ContextGC intentionally has no recursive-delete command in release `0.1.7`.
 
 ## Escalation
 

@@ -249,6 +249,12 @@ status transcript. Native Codex summary contents are opaque to ContextGC;
 notifications report only the checkpoint, snapshot, and recovery state that the
 plugin can verify.
 
+Checkpoint freshness is advisory. When recent work outgrows the latest verified
+Task Frame, `PreCompact` preserves that frame as a byte-verified fallback and
+allows native compaction; the result notice says that recent work relies on
+Codex's opaque native summary. ContextGC blocks automatic compaction only when
+checkpoint integrity or durable snapshot/state persistence cannot be verified.
+
 An empty store is handled fail-closed. The first writable user turn may request
 one checkpoint without a path; Plan mode defers the mutation for that turn.
 Automatic PreCompact stays blocked until the checkpoint, snapshot, and hook

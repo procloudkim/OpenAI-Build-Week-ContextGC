@@ -115,6 +115,13 @@ entry를 사용하도록 release version을 `0.1.5`로 올렸고, 최종 hook ma
 무음으로 바꾸고, 알림은 최대 3줄로 제한했으며, resume 온보딩 반복을 없애고,
 checkpoint freshness 검사를 실제 PreCompact 안전 경계로 옮겼습니다.
 
+그 경계도 한 번 더 수정해야 했습니다. 새 session 수용 테스트에서 `0.1.6`이
+여섯 번의 tool event를 정상 checkpoint의 integrity 실패처럼 취급해 자동 압축을
+`STALE`로 중단하는 문제가 드러났습니다. `0.1.7`은 semantic coverage와 storage
+integrity를 분리합니다. 이전 verified frame은 fallback으로 보존하고 native
+compaction은 허용하며, coverage gap만 2줄로 알립니다. Corruption과 durable write
+실패는 계속 fail-closed입니다.
+
 ## 과장하지 않는 평가
 
 ContextGC는 세 개의 고정 software-engineering trace를 manual, fixed,

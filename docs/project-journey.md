@@ -123,6 +123,13 @@ lifecycle events became silent, user-visible notices were capped at three
 lines, resume stopped repeating onboarding, and checkpoint freshness moved to
 the actual PreCompact safety boundary.
 
+That boundary still needed one more correction. A fresh-session trial showed
+that `0.1.6` treated six tool events as if an intact checkpoint had failed
+integrity, interrupting automatic compaction with `STALE`. Release `0.1.7`
+separates semantic coverage from storage integrity: it preserves the verified
+older frame as a fallback, allows native compaction, and reports the coverage
+gap in two lines. Corruption and failed durable writes remain fail-closed.
+
 ## Evaluation without pretending
 
 ContextGC replays three frozen software-engineering traces under manual,

@@ -51,6 +51,9 @@ repository files, tests, or Codex's native compaction.
   create a user-facing continuation solely to restate ContextGC health.
 - A healthy compaction uses one line. A recovery, restore, or integrity warning
   uses at most three lines and 240 characters.
+- Treat checkpoint freshness as advisory: preserve a verified fallback and let
+  native compaction proceed. Block only when checkpoint, snapshot, or hook-state
+  integrity cannot be established.
 - Keep identifiers and local paths out of hook notifications. Report a
   checkpoint ID only when the user explicitly requests the operation result.
 - Put detailed explanations in the README or an explicit status response. Do
