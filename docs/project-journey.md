@@ -135,6 +135,9 @@ PostCompact audit events; it did not change the `0.1.7` liveness correction.
 Release `0.1.9` validated the exact Codex CLI `0.145.0` stable transcript shape,
 kept later unverified schemas fail-closed, and aligned the public installation,
 privacy, checksum, and recovery documentation through zero-context cold reads.
+Release `0.1.10` then responded to newly published dependency advisories without
+rewriting `v0.1.9`: patched transitive versions were locked, the full build and
+rendered tests remained green, and a new immutable release identity was used.
 
 ## Evaluation without pretending
 

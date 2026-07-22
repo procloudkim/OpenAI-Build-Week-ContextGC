@@ -7,7 +7,7 @@ the repository, screenshots, video, issues, and public chat.
 The official deadline was **July 21, 2026 at 5:00 PM Pacific Time**
 (**July 22, 2026 at 9:00 AM Korea Standard Time**). The owner reported the
 Devpost entry submitted. This document now preserves the privacy and release
-checks for the public `v0.1.9` source; it is not proof of Devpost's private UI
+checks for the public `v0.1.10` source; it is not proof of Devpost's private UI
 state.
 
 ## 1. Freeze the candidate
@@ -23,7 +23,7 @@ node scripts/contextgc.bundle.mjs simulate
 ```
 
 - [ ] Confirm the receipt hash matches the site and checked-in report.
-- [ ] Do not change plugin bytes under version `0.1.9`. Any plugin-byte change
+- [ ] Do not change plugin bytes under version `0.1.10`. Any plugin-byte change
       requires a new version, restaging, reinstall, and trust review.
 
 ## 2. Privacy gate before publication
@@ -53,7 +53,7 @@ Required checks:
 The public release branch prepared by this repository is:
 
 ```text
-submission-release-v0.1.9
+submission-release-v0.1.10
 ```
 
 Before pushing it, verify that it has one reachable commit and that its tree is
@@ -65,7 +65,7 @@ Choose exactly one path.
 
 ### Preferred: public open-source repository
 
-- [ ] Push only `submission-release-v0.1.9` to the public repository's `main`.
+- [ ] Push only `submission-release-v0.1.10` to the public repository's `main`.
 - [ ] Confirm MIT `LICENSE` is visible.
 - [ ] Open the repository in a signed-out/private browser.
 - [ ] Test a fresh anonymous clone.

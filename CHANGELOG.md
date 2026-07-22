@@ -6,6 +6,18 @@ All notable ContextGC changes are recorded here. Dates use ISO 8601.
 
 No unreleased changes.
 
+## [0.1.10] - 2026-07-23
+
+### Fixed
+
+- Update transitive `fast-uri` to patched `3.1.4` after
+  `GHSA-v2hh-gcrm-f6hx`.
+- Override transitive `sharp` to patched `0.35.3` after
+  `GHSA-f88m-g3jw-g9cj`, while keeping the full site build and rendered tests as
+  compatibility gates until upstream Next/Cloudflare ranges include `0.35.x`.
+- Publish the dependency-audit correction as a new immutable plugin/release
+  version rather than moving the already published `v0.1.9` tag.
+
 ## [0.1.9] - 2026-07-23
 
 ### Added

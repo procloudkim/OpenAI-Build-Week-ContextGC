@@ -1,6 +1,6 @@
 {
   "name": "context-gc",
-  "version": "0.1.9",
+  "version": "0.1.10",
   "description": "Local-first, reversible task-context checkpoints for Codex.",
   "author": {
     "name": "ContextGC Contributors"

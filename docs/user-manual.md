@@ -4,7 +4,7 @@
 
 | Field | Value |
 | --- | --- |
-| Product | ContextGC 0.1.9 |
+| Product | ContextGC 0.1.10 |
 | Manual type | Windows installation and operations tutorial |
 | Target reader | A Windows Codex user installing ContextGC from its public repository |
 | Reader job | Install ContextGC, trust it deliberately, create and recover a task-context checkpoint, and manage the installation without confusing context recovery with source-code recovery |
@@ -99,9 +99,9 @@ Clone over HTTPS; no repository credential belongs in the checkout or prompt:
 
 ```powershell
 Set-Location C:\path\to\your\projects
-git clone --branch v0.1.9 --depth 1 https://github.com/procloudkim/OpenAI-Build-Week-ContextGC.git context-gc
+git clone --branch v0.1.10 --depth 1 https://github.com/procloudkim/OpenAI-Build-Week-ContextGC.git context-gc
 Set-Location .\context-gc
-$manifest = Get-Content .\release\v0.1.9.sha256
+$manifest = Get-Content .\release\v0.1.10.sha256
 foreach ($line in $manifest) {
   if ($line -notmatch '^([a-f0-9]{64})  (.+)$') { throw 'Malformed hash manifest.' }
   $expected, $path = $Matches[1], $Matches[2]
@@ -147,7 +147,7 @@ resolve them intentionally. Do not hide unknown work with an automatic reset.
 When the clone is clean, fetch and select the reviewed release tag:
 
 ```powershell
-$targetVersion = 'v0.1.9'
+$targetVersion = 'v0.1.10'
 git fetch --tags --prune
 git checkout --detach $targetVersion
 ```
@@ -466,7 +466,7 @@ $Adaptive = $Result.data.aggregates | Where-Object policy -eq "A_ADAPTIVE"
 } | Format-List
 ```
 
-For ContextGC 0.1.9 with the checked-in fixtures, the exact observable is:
+For ContextGC 0.1.10 with the checked-in fixtures, the exact observable is:
 
 ```text
 ok                          : True
@@ -513,7 +513,7 @@ Expected cleanup observable: `False`.
 ```powershell
 Set-Location C:\path\to\context-gc
 git status --short
-$targetVersion = 'v0.1.9'
+$targetVersion = 'v0.1.10'
 git fetch --tags --prune
 git checkout --detach $targetVersion
 codex plugin add context-gc@context-gc-local
@@ -525,7 +525,7 @@ the updated `plugins\context-gc\.codex-plugin\plugin.json`.
 
 If the installed row remains stale, close active Codex processes and back up
 the private store before running `plugin remove` followed by `plugin add`. The
-add-only path was verified for `0.1.9`; do not overwrite the versioned cache by
+add-only path was verified for `0.1.10`; do not overwrite the versioned cache by
 hand.
 
 Start a new thread after reinstalling. If the hook definition changed, Codex

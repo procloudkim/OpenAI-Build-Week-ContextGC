@@ -1,6 +1,6 @@
 {
   "name": "context-gc",
-  "version": "0.1.9",
+  "version": "0.1.10",
   "description": "A local-first, reversible context control plane for Codex.",
   "license": "MIT",
   "repository": {

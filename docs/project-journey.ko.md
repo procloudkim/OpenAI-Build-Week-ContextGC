@@ -127,6 +127,9 @@ compaction은 허용하며, coverage gap만 2줄로 알립니다. Corruption과 
 `0.1.9`는 Codex CLI `0.145.0` stable transcript shape를 정확히 검증하고, 이후
 검증되지 않은 schema는 fail-closed로 유지했으며, zero-context cold read를 통해
 공개 설치·개인정보·checksum·복구 문서를 정렬했습니다.
+`0.1.10`은 새 dependency advisory에 대응하면서 `v0.1.9`를 재작성하지
+않았습니다. patched transitive version을 lock하고 full build와 rendered test를
+다시 통과시킨 뒤 새 immutable release identity를 사용했습니다.
 
 ## 과장하지 않는 평가
 
