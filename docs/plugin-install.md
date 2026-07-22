@@ -1,6 +1,6 @@
 # Install ContextGC
 
-ContextGC `0.1.10` is a prebuilt Codex plugin for Node.js 22.13 or newer. No
+ContextGC `0.1.11` is a prebuilt Codex plugin for Node.js 22.13 or newer. No
 TypeScript build or separate OpenAI API key is required for normal plugin use.
 
 ## Before installation
@@ -13,9 +13,9 @@ TypeScript build or separate OpenAI API key is required for normal plugin use.
 ## Clone and install
 
 ```powershell
-git clone --branch v0.1.10 --depth 1 https://github.com/procloudkim/OpenAI-Build-Week-ContextGC.git context-gc
+git clone --branch v0.1.11 --depth 1 https://github.com/procloudkim/OpenAI-Build-Week-ContextGC.git context-gc
 Set-Location context-gc
-$manifest = Get-Content .\release\v0.1.10.sha256
+$manifest = Get-Content .\release\v0.1.11.sha256
 foreach ($line in $manifest) {
   if ($line -notmatch '^([a-f0-9]{64})  (.+)$') { throw 'Malformed hash manifest.' }
   $expected, $path = $Matches[1], $Matches[2]
@@ -35,7 +35,7 @@ because the tag and manifest are not cryptographically signed.
 Expected observable: the list contains:
 
 ```text
-context-gc@context-gc-local  installed, enabled  0.1.10
+context-gc@context-gc-local  installed, enabled  0.1.11
 ```
 
 If you already have the clone, run the final three commands from its root.
@@ -94,7 +94,7 @@ Confirm all of these before treating the setup as complete:
   `latestCheckpointStatus: verified`;
 - a new thread loads only the bounded, integrity-verified Task Frame.
 
-Preserve important checkpoint UUIDs. ContextGC `0.1.10` does not expose a public
+Preserve important checkpoint UUIDs. ContextGC `0.1.11` does not expose a public
 checkpoint-list command.
 
 Redaction takes precedence over exact retention. If a protected exact value is
@@ -126,7 +126,7 @@ Expected observable: all three frozen policies report 3/3 verified tasks and
 the receipt hash equals
 `f7699823546f79657aea0faa290c0c648b8876236456f7a8ff02003875147ddd`.
 Compare it with the checked-in
-[benchmark receipt](https://github.com/procloudkim/OpenAI-Build-Week-ContextGC/blob/v0.1.10/output/benchmark/benchmark-report.json). This is
+[benchmark receipt](https://github.com/procloudkim/OpenAI-Build-Week-ContextGC/blob/v0.1.11/output/benchmark/benchmark-report.json). This is
 synthetic regression evidence. It
 does not invoke native Codex compaction, make an API call, or estimate Codex
 credits.
@@ -134,7 +134,7 @@ credits.
 ## Update
 
 ```powershell
-$targetVersion = 'v0.1.10'
+$targetVersion = 'v0.1.11'
 git fetch --tags --prune
 git checkout --detach $targetVersion
 node scripts/contextgc.bundle.mjs --version
@@ -197,8 +197,8 @@ codex plugin marketplace remove context-gc-local
 
 ## Next references
 
-- [English user manual](https://github.com/procloudkim/OpenAI-Build-Week-ContextGC/blob/v0.1.10/docs/user-manual.md)
-- [한국어 사용자 매뉴얼](https://github.com/procloudkim/OpenAI-Build-Week-ContextGC/blob/v0.1.10/docs/user-manual.ko.md)
-- [Troubleshooting](https://github.com/procloudkim/OpenAI-Build-Week-ContextGC/blob/v0.1.10/docs/troubleshooting.md)
-- [Interface reference](https://github.com/procloudkim/OpenAI-Build-Week-ContextGC/blob/v0.1.10/docs/reference.md)
-- [Security and privacy](https://github.com/procloudkim/OpenAI-Build-Week-ContextGC/blob/v0.1.10/docs/security-and-privacy.md)
+- [English user manual](https://github.com/procloudkim/OpenAI-Build-Week-ContextGC/blob/v0.1.11/docs/user-manual.md)
+- [한국어 사용자 매뉴얼](https://github.com/procloudkim/OpenAI-Build-Week-ContextGC/blob/v0.1.11/docs/user-manual.ko.md)
+- [Troubleshooting](https://github.com/procloudkim/OpenAI-Build-Week-ContextGC/blob/v0.1.11/docs/troubleshooting.md)
+- [Interface reference](https://github.com/procloudkim/OpenAI-Build-Week-ContextGC/blob/v0.1.11/docs/reference.md)
+- [Security and privacy](https://github.com/procloudkim/OpenAI-Build-Week-ContextGC/blob/v0.1.11/docs/security-and-privacy.md)

@@ -53,7 +53,7 @@ For an optional no-build local reproduction, use the pinned release. This path
 requires Node.js 22.13 or newer but no dependency installation or rebuild:
 
 ```powershell
-git clone --branch v0.1.10 --depth 1 https://github.com/procloudkim/OpenAI-Build-Week-ContextGC.git context-gc
+git clone --branch v0.1.11 --depth 1 https://github.com/procloudkim/OpenAI-Build-Week-ContextGC.git context-gc
 Set-Location context-gc
 node scripts/contextgc.bundle.mjs simulate
 ```
@@ -248,8 +248,8 @@ only for Codex `0.144.x`, `0.145.0-alpha.x`, and the exact `0.145.0` stable
 schema; later versions disable automatic decisions rather than being treated as
 compatible.
 
-Release `v0.1.10` pins the reviewed source. Verify the checked-in
-[release hash manifest](release/v0.1.10.sha256) before trusting prebuilt bundles
+Release `v0.1.11` pins the reviewed source. Verify the checked-in
+[release hash manifest](release/v0.1.11.sha256) before trusting prebuilt bundles
 or hooks. Matching `/hooks` with the clone proves command parity; the release
 tag and manifest identify which source and bytes were reviewed.
 

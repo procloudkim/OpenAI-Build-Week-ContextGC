@@ -15,7 +15,7 @@ the reproducible fallback.
 5. Confirm the separately verified synthetic receipt hash is
    `f7699823546f79657aea0faa290c0c648b8876236456f7a8ff02003875147ddd`.
 6. Open the matching checked-in
-   [receipt](https://github.com/procloudkim/OpenAI-Build-Week-ContextGC/blob/v0.1.10/output/benchmark/benchmark-report.json).
+   [receipt](https://github.com/procloudkim/OpenAI-Build-Week-ContextGC/blob/v0.1.11/output/benchmark/benchmark-report.json).
 
 The hosted demo uses synthetic data and cannot access a visitor's local Codex
 files.
@@ -29,9 +29,9 @@ Requirements: Git and Node.js 22.13 or newer. No dependency installation, API
 key or rebuild is needed for this receipt path.
 
 ```powershell
-git clone --branch v0.1.10 --depth 1 https://github.com/procloudkim/OpenAI-Build-Week-ContextGC.git context-gc
+git clone --branch v0.1.11 --depth 1 https://github.com/procloudkim/OpenAI-Build-Week-ContextGC.git context-gc
 Set-Location context-gc
-$manifest = Get-Content .\release\v0.1.10.sha256
+$manifest = Get-Content .\release\v0.1.11.sha256
 foreach ($line in $manifest) {
   if ($line -notmatch '^([a-f0-9]{64})  (.+)$') { throw 'Malformed hash manifest.' }
   $expected, $path = $Matches[1], $Matches[2]

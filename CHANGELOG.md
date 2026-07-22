@@ -6,6 +6,15 @@ All notable ContextGC changes are recorded here. Dates use ISO 8601.
 
 No unreleased changes.
 
+## [0.1.11] - 2026-07-23
+
+### Fixed
+
+- Keep runtime-owned checkpoint UUIDs and timestamps outside user-content
+  redaction so phone-shaped UUID segments cannot invalidate a new checkpoint.
+- Persist the already-sanitized Task Frame exactly once, while preserving its
+  validated secret-scan metadata and the normal archive redaction boundary.
+
 ## [0.1.10] - 2026-07-23
 
 ### Fixed

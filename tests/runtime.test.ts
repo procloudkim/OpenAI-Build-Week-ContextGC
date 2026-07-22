@@ -8,6 +8,7 @@ import { afterEach, test } from "node:test";
 
 import {
   ContentArchive,
+  CheckpointStore,
   ContextGcRuntime,
   MAX_CHECKPOINT_FRAME_BYTES,
   MAX_CHECKPOINT_MANIFEST_BYTES,
@@ -223,6 +224,38 @@ test("invalid and corrupt latest targets do not block explicit restore or strict
     ? {}
     : JSON.parse(precompactOutput) as { continue?: boolean };
   assert.notEqual(precompact.continue, false);
+});
+
+test("runtime-owned checkpoint identity is never changed by user-content redaction", async () => {
+  const root = await temporaryRoot();
+  const paths = resolveRuntimePaths({ dataDir: root });
+  const phoneShapedCheckpointId = "8c851b9e-9082-4215-8082-e90ce209f7a6";
+  const checkpoints = new CheckpointStore(
+    paths,
+    new ContentArchive(paths.archive),
+    () => phoneShapedCheckpointId,
+  );
+
+  const created = await checkpoints.create({ goal: "Preserve runtime identity exactly" });
+  assert.equal(created.frame.checkpointId, phoneShapedCheckpointId);
+  assert.equal(created.manifest.frameRef.redactions, 0);
+
+  const restored = await checkpoints.read(phoneShapedCheckpointId);
+  assert.equal(restored.frame.checkpointId, phoneShapedCheckpointId);
+  assert.equal(restored.manifest.checkpointId, phoneShapedCheckpointId);
+});
+
+test("pre-scanned archive text validates its redaction count", async () => {
+  const root = await temporaryRoot();
+  const archive = new ContentArchive(resolve(root, "pre-scanned-archive"));
+
+  await assert.rejects(() => archive.putPreScannedText("safe", -1), RangeError);
+  const clean = await archive.putPreScannedText("safe", 0);
+  assert.equal(clean.secretScanStatus, "clean");
+  assert.equal(clean.sanitized, false);
+  const sanitized = await archive.putPreScannedText("[REDACTED]", 1);
+  assert.equal(sanitized.secretScanStatus, "sanitized");
+  assert.equal(sanitized.sanitized, true);
 });
 
 test("status verifies the Task Frame mirror and init repairs it from canonical bytes", async () => {

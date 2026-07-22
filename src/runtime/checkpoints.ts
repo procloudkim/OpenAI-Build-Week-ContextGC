@@ -31,10 +31,12 @@ export type LatestCheckpointPointer =
 export class CheckpointStore {
   readonly paths: RuntimePaths;
   readonly archive: ContentArchive;
+  readonly #newCheckpointId: () => string;
 
-  constructor(paths: RuntimePaths, archive: ContentArchive) {
+  constructor(paths: RuntimePaths, archive: ContentArchive, newCheckpointId = randomUUID) {
     this.paths = paths;
     this.archive = archive;
+    this.#newCheckpointId = newCheckpointId;
   }
 
   async init(): Promise<void> {
@@ -70,7 +72,7 @@ export class CheckpointStore {
     // legacy frame while preparing its marked successor.
     await this.#initStorage();
     const previousMirror = await this.#readMirrorForRollback();
-    const checkpointId = randomUUID();
+    const checkpointId = this.#newCheckpointId();
     const createdAt = new Date().toISOString();
     const parentCheckpointId = await this.#verifiedParentCheckpointId();
     const normalized = normalizeFrame(frame, checkpointId, createdAt);
@@ -80,24 +82,38 @@ export class CheckpointStore {
         `Task frame is ${unredactedBytes} bytes; maximum is ${MAX_CHECKPOINT_FRAME_BYTES} bytes`,
       );
     }
-    const redacted = redactJson(normalized as unknown as JsonObject);
-    const serialized = `${JSON.stringify(redacted.value, null, 2)}\n`;
+    const userFields: JsonObject = {
+      goal: normalized.goal,
+      constraints: [...normalized.constraints],
+      decisions: [...normalized.decisions],
+      openLoops: [...normalized.openLoops],
+      activeFiles: [...normalized.activeFiles],
+      testEvidence: [...normalized.testEvidence],
+      failedAttempts: [...normalized.failedAttempts],
+      evidencePointers: [...normalized.evidencePointers],
+    };
+    const redacted = redactJson(userFields);
+    const sanitizedUserFields = redacted.value as unknown as Omit<
+      StoredTaskFrameFields,
+      "schemaVersion" | "checkpointId" | "createdAt"
+    >;
+    const storedFrame: StoredTaskFrame<TFrame> = {
+      schemaVersion: 1,
+      checkpointId,
+      createdAt,
+      ...sanitizedUserFields,
+    } as StoredTaskFrame<TFrame>;
+    const serialized = `${JSON.stringify(storedFrame, null, 2)}\n`;
     const serializedBytes = Buffer.from(serialized, "utf8");
     if (serializedBytes.byteLength > MAX_CHECKPOINT_FRAME_BYTES) {
       throw new RuntimeCapacityError(
         `Redacted Task frame is ${serializedBytes.byteLength} bytes; maximum is ${MAX_CHECKPOINT_FRAME_BYTES} bytes`,
       );
     }
-    const storedRef = await this.archive.put(serialized);
-    if (storedRef.bytes !== serializedBytes.byteLength || storedRef.hash !== sha256(serializedBytes)) {
+    const frameRef = await this.archive.putPreScannedText(serialized, redacted.count);
+    if (frameRef.bytes !== serializedBytes.byteLength || frameRef.hash !== sha256(serializedBytes)) {
       throw new RuntimeIntegrityError("Task frame archive bytes changed after deterministic redaction");
     }
-    const frameRef: ContentRef = {
-      ...storedRef,
-      secretScanStatus: redacted.count > 0 ? "sanitized" : "clean",
-      sanitized: redacted.count > 0,
-      redactions: redacted.count,
-    };
     const manifest: CheckpointManifest = {
       schemaVersion: 1,
       privacyBoundary: CHECKPOINT_PRIVACY_BOUNDARY,
@@ -129,8 +145,8 @@ export class CheckpointStore {
       throw error;
     }
 
-    await this.#publishLatest(checkpointId, redacted.value, previousMirror);
-    return { manifest, frame: redacted.value as unknown as StoredTaskFrame<TFrame> };
+    await this.#publishLatest(checkpointId, storedFrame, previousMirror);
+    return { manifest, frame: storedFrame };
   }
 
   async read<TFrame extends PersistableTaskFrame = PersistableTaskFrame>(

@@ -16960,9 +16960,6 @@ var ContentArchive = class {
   }
   async put(content) {
     const inputBytes = typeof content === "string" ? Buffer.byteLength(content, "utf8") : content.byteLength;
-    if (inputBytes > this.maxObjectBytes) {
-      throw new RuntimeCapacityError(`Archive input is ${inputBytes} bytes; maximum object size is ${this.maxObjectBytes} bytes`);
-    }
     const prepared = typeof content === "string" ? (() => {
       const redacted = redactText(content);
       return {
@@ -16979,6 +16976,29 @@ var ContentArchive = class {
       sanitized: false,
       redactions: 0
     };
+    return this.#putPrepared(prepared, inputBytes);
+  }
+  /**
+   * Persist UTF-8 text that the caller has already passed through the runtime's
+   * deterministic redaction boundary. Exact bytes are preserved so runtime-owned
+   * identifiers cannot be mistaken for user secrets during a second scan.
+   */
+  async putPreScannedText(content, redactions) {
+    if (!Number.isSafeInteger(redactions) || redactions < 0) {
+      throw new RangeError("redactions must be a non-negative safe integer");
+    }
+    return this.#putPrepared({
+      bytes: Buffer.from(content, "utf8"),
+      mediaType: "text/plain; charset=utf-8",
+      secretScanStatus: redactions > 0 ? "sanitized" : "clean",
+      sanitized: redactions > 0,
+      redactions
+    }, Buffer.byteLength(content, "utf8"));
+  }
+  async #putPrepared(prepared, inputBytes) {
+    if (inputBytes > this.maxObjectBytes) {
+      throw new RuntimeCapacityError(`Archive input is ${inputBytes} bytes; maximum object size is ${this.maxObjectBytes} bytes`);
+    }
     if (prepared.bytes.byteLength > this.maxObjectBytes) {
       throw new RuntimeCapacityError(`Sanitized archive object is ${prepared.bytes.byteLength} bytes; maximum object size is ${this.maxObjectBytes} bytes`);
     }
@@ -17146,9 +17166,11 @@ var CHECKPOINT_PRIVACY_BOUNDARY = "deterministic-minimization-v1";
 var CheckpointStore = class {
   paths;
   archive;
-  constructor(paths, archive) {
+  #newCheckpointId;
+  constructor(paths, archive, newCheckpointId = randomUUID2) {
     this.paths = paths;
     this.archive = archive;
+    this.#newCheckpointId = newCheckpointId;
   }
   async init() {
     await this.#initStorage();
@@ -17174,7 +17196,7 @@ var CheckpointStore = class {
   async create(frame, options = {}) {
     await this.#initStorage();
     const previousMirror = await this.#readMirrorForRollback();
-    const checkpointId = randomUUID2();
+    const checkpointId = this.#newCheckpointId();
     const createdAt = (/* @__PURE__ */ new Date()).toISOString();
     const parentCheckpointId = await this.#verifiedParentCheckpointId();
     const normalized = normalizeFrame(frame, checkpointId, createdAt);
@@ -17182,23 +17204,34 @@ var CheckpointStore = class {
     if (unredactedBytes > MAX_CHECKPOINT_FRAME_BYTES) {
       throw new RuntimeCapacityError(`Task frame is ${unredactedBytes} bytes; maximum is ${MAX_CHECKPOINT_FRAME_BYTES} bytes`);
     }
-    const redacted = redactJson(normalized);
-    const serialized = `${JSON.stringify(redacted.value, null, 2)}
+    const userFields = {
+      goal: normalized.goal,
+      constraints: [...normalized.constraints],
+      decisions: [...normalized.decisions],
+      openLoops: [...normalized.openLoops],
+      activeFiles: [...normalized.activeFiles],
+      testEvidence: [...normalized.testEvidence],
+      failedAttempts: [...normalized.failedAttempts],
+      evidencePointers: [...normalized.evidencePointers]
+    };
+    const redacted = redactJson(userFields);
+    const sanitizedUserFields = redacted.value;
+    const storedFrame = {
+      schemaVersion: 1,
+      checkpointId,
+      createdAt,
+      ...sanitizedUserFields
+    };
+    const serialized = `${JSON.stringify(storedFrame, null, 2)}
 `;
     const serializedBytes = Buffer.from(serialized, "utf8");
     if (serializedBytes.byteLength > MAX_CHECKPOINT_FRAME_BYTES) {
       throw new RuntimeCapacityError(`Redacted Task frame is ${serializedBytes.byteLength} bytes; maximum is ${MAX_CHECKPOINT_FRAME_BYTES} bytes`);
     }
-    const storedRef = await this.archive.put(serialized);
-    if (storedRef.bytes !== serializedBytes.byteLength || storedRef.hash !== sha256(serializedBytes)) {
+    const frameRef = await this.archive.putPreScannedText(serialized, redacted.count);
+    if (frameRef.bytes !== serializedBytes.byteLength || frameRef.hash !== sha256(serializedBytes)) {
       throw new RuntimeIntegrityError("Task frame archive bytes changed after deterministic redaction");
     }
-    const frameRef = {
-      ...storedRef,
-      secretScanStatus: redacted.count > 0 ? "sanitized" : "clean",
-      sanitized: redacted.count > 0,
-      redactions: redacted.count
-    };
     const manifest = {
       schemaVersion: 1,
       privacyBoundary: CHECKPOINT_PRIVACY_BOUNDARY,
@@ -17226,8 +17259,8 @@ var CheckpointStore = class {
       await rm2(temporary, { recursive: true, force: true });
       throw error51;
     }
-    await this.#publishLatest(checkpointId, redacted.value, previousMirror);
-    return { manifest, frame: redacted.value };
+    await this.#publishLatest(checkpointId, storedFrame, previousMirror);
+    return { manifest, frame: storedFrame };
   }
   async read(checkpointId) {
     const checkpointPath = this.#checkpointPath(checkpointId);
@@ -17949,7 +17982,7 @@ var defaultRuntimeFactory = (options) => {
 };
 
 // dist/src/cli/version.js
-var CONTEXT_GC_VERSION = "0.1.10";
+var CONTEXT_GC_VERSION = "0.1.11";
 
 // dist/src/cli/commands.js
 function runtimeOptions(args, io) {

@@ -42,11 +42,6 @@ export class ContentArchive {
 
   async put(content: string | Uint8Array): Promise<ContentRef> {
     const inputBytes = typeof content === "string" ? Buffer.byteLength(content, "utf8") : content.byteLength;
-    if (inputBytes > this.maxObjectBytes) {
-      throw new RuntimeCapacityError(
-        `Archive input is ${inputBytes} bytes; maximum object size is ${this.maxObjectBytes} bytes`,
-      );
-    }
     const prepared =
       typeof content === "string"
         ? (() => {
@@ -66,6 +61,46 @@ export class ContentArchive {
             sanitized: false,
             redactions: 0,
           };
+
+    return this.#putPrepared(prepared, inputBytes);
+  }
+
+  /**
+   * Persist UTF-8 text that the caller has already passed through the runtime's
+   * deterministic redaction boundary. Exact bytes are preserved so runtime-owned
+   * identifiers cannot be mistaken for user secrets during a second scan.
+   */
+  async putPreScannedText(content: string, redactions: number): Promise<ContentRef> {
+    if (!Number.isSafeInteger(redactions) || redactions < 0) {
+      throw new RangeError("redactions must be a non-negative safe integer");
+    }
+    return this.#putPrepared(
+      {
+        bytes: Buffer.from(content, "utf8"),
+        mediaType: "text/plain; charset=utf-8",
+        secretScanStatus: redactions > 0 ? "sanitized" : "clean",
+        sanitized: redactions > 0,
+        redactions,
+      },
+      Buffer.byteLength(content, "utf8"),
+    );
+  }
+
+  async #putPrepared(
+    prepared: {
+      readonly bytes: Buffer;
+      readonly mediaType: ContentRef["mediaType"];
+      readonly secretScanStatus: ContentRef["secretScanStatus"];
+      readonly sanitized: boolean;
+      readonly redactions: number;
+    },
+    inputBytes: number,
+  ): Promise<ContentRef> {
+    if (inputBytes > this.maxObjectBytes) {
+      throw new RuntimeCapacityError(
+        `Archive input is ${inputBytes} bytes; maximum object size is ${this.maxObjectBytes} bytes`,
+      );
+    }
 
     if (prepared.bytes.byteLength > this.maxObjectBytes) {
       throw new RuntimeCapacityError(

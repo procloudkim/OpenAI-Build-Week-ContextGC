@@ -50,7 +50,7 @@ try {
   }
 
   const dataDir = join(scratch, "mcp-data");
-  const client = new Client({ name: "contextgc-bundle-smoke", version: "0.1.10" });
+  const client = new Client({ name: "contextgc-bundle-smoke", version: "0.1.11" });
   const transport = new StdioClientTransport({
     command: process.execPath,
     args: [join(root, "scripts", "mcp-server.bundle.mjs")],

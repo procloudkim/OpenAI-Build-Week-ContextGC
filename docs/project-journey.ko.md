@@ -130,6 +130,10 @@ compaction은 허용하며, coverage gap만 2줄로 알립니다. Corruption과 
 `0.1.10`은 새 dependency advisory에 대응하면서 `v0.1.9`를 재작성하지
 않았습니다. patched transitive version을 lock하고 full build와 rendered test를
 다시 통과시킨 뒤 새 immutable release identity를 사용했습니다.
+`0.1.11`은 CI가 발견한 redaction boundary 사례를 수정했습니다. User field를
+최소화한 뒤 runtime-owned checkpoint identity를 조립하고, 이미 정제된 Task
+Frame은 두 번째 content scan 없이 보관합니다. 전화번호 형태 UUID를 고정한
+regression test로 이 invariant를 보호합니다.
 
 ## 과장하지 않는 평가
 

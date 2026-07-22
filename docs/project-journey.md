@@ -138,6 +138,10 @@ privacy, checksum, and recovery documentation through zero-context cold reads.
 Release `0.1.10` then responded to newly published dependency advisories without
 rewriting `v0.1.9`: patched transitive versions were locked, the full build and
 rendered tests remained green, and a new immutable release identity was used.
+Release `0.1.11` fixed a CI-discovered redaction boundary case: runtime-owned
+checkpoint identity is now assembled after user-field minimization and its
+already-sanitized Task Frame is archived without a second content scan. A
+deterministic phone-shaped UUID regression test preserves the invariant.
 
 ## Evaluation without pretending
 
