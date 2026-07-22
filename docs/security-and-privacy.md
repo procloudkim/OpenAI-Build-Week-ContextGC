@@ -18,7 +18,8 @@ are still processed by that session's model.
 - Non-secret protected information is never irreversibly deleted; detected
   secret values are intentionally replaced before persistence.
 - Normal installed-plugin MCP calls infer the private local store. Model-visible
-  tool and hook output uses an opaque `storeId`, not an absolute local path.
+  MCP output uses opaque `storeId` and the injected Task Frame uses
+  `contextgcStoreId`, not an absolute local path.
 - Persisted Task Frames use a closed schema. Active-file paths must be
   repository-relative and evidence pointers cannot be local absolute paths.
 - Raw checkpoint and transcript source session identifiers are not persisted;

@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
 
-import { parseArgs, UsageError } from "../src/cli/args.js";
+import { HELP_TEXT, parseArgs, UsageError } from "../src/cli/args.js";
 import { runCli } from "../src/cli/main.js";
 import type { CliIo, ContextGcService } from "../src/cli/types.js";
 
@@ -47,6 +47,23 @@ test("argument parser rejects restore without exactly one checkpoint id", () => 
   assert.throws(() => parseArgs(["restore"]), UsageError);
   assert.throws(() => parseArgs(["restore", "one", "two"]), UsageError);
   assert.equal(parseArgs(["restore", "one"]).checkpointId, "one");
+});
+
+test("runtime selection flags are explicit and accepted by every operational command", () => {
+  const commands: readonly (readonly string[])[] = [
+    ["status"],
+    ["simulate"],
+    ["checkpoint"],
+    ["restore", "checkpoint-id"],
+    ["report"],
+  ];
+  for (const command of commands) {
+    const parsed = parseArgs([...command, "--cwd", "workspace", "--data-dir", "store"]);
+    assert.equal(parsed.cwd, "workspace");
+    assert.equal(parsed.dataDir, "store");
+  }
+  assert.match(HELP_TEXT, /Runtime selection options \(all non-help commands\):/u);
+  assert.match(HELP_TEXT, /--data-dir PATH/u);
 });
 
 test("status reports the public Codex credit-conversion boundary", async () => {

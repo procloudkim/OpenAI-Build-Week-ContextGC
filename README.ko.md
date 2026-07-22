@@ -6,10 +6,14 @@
 
 ![ContextGC 표지](submission/assets/contextgc-cover.jpeg)
 
-ContextGC는 긴 Codex 엔지니어링 작업을 위한 로컬 우선, 가역적 컨텍스트
-제어 계층입니다. 정확히 보존해야 하는 목표와 제약을 typed invariant로
-보호하고, 근거를 해시로 보관하며, 압축 또는 새 세션 이후 작은 Task Frame으로
-작업을 복구합니다.
+ContextGC는 긴 Codex 엔지니어링 작업을 위한 로컬 지속화 기반의 가역적
+컨텍스트 제어 계층입니다. 정확히 보존해야 하는 목표와 제약을 typed
+invariant로 보호하고, 근거를 해시로 보관하며, 압축 또는 새 세션 이후 작은
+Task Frame으로 작업을 복구합니다. 여기서 가역성은 검증된 Task Frame
+checkpoint 선택과 보관 근거의 rehydrate를 뜻하며, redaction된 원문, Git,
+파일, 명령이나 외부 부작용을 되돌린다는 뜻이 아닙니다. Codex turn에 주입된
+Task Frame은 사용자의 일반 Codex 서비스 경계에서 처리되므로 로컬 지속화가
+오프라인 모델 실행을 의미하지도 않습니다.
 
 OpenAI Build Week의 Developer Tools 프로젝트입니다.
 
@@ -38,19 +42,25 @@ ContextGC는 Markdown 기록을 없애지 않습니다. 그 위에 다음과 같
 인한 재작업 위험을 줄이는 것입니다. 현재 버전은 실제 Codex credits 절감을
 측정했다고 주장하지 않습니다.
 
-## 심사위원을 위한 60초 경로
+## 심사위원을 위한 60초 공개 경로
 
 1. [증거 탐색 데모](https://contextgc-build-week.trytrytry.chatgpt.site)에서
-   synthetic receipt를 확인합니다.
-2. Node.js 22.13 이상에서 별도 빌드 없이 같은 receipt를 재현합니다.
+   synthetic receipt를 확인합니다. 2026-07-23 인증 없는 HTTP GET에서 `200`
+   응답을 확인했지만 향후 hosting 가용성을 보장하지는 않습니다.
+2. 정확한 [저장소 receipt](output/benchmark/benchmark-report.json)와 전체 hash
+   `f7699823546f79657aea0faa290c0c648b8876236456f7a8ff02003875147ddd`를
+   비교합니다.
+
+선택적으로 Node.js 22.13 이상에서 고정된 release를 별도 빌드 없이
+재현할 수 있습니다.
 
 ```powershell
-git clone https://github.com/procloudkim/OpenAI-Build-Week-ContextGC.git
+git clone --branch v0.1.9 --depth 1 https://github.com/procloudkim/OpenAI-Build-Week-ContextGC.git context-gc
 Set-Location context-gc
 node scripts/contextgc.bundle.mjs simulate
 ```
 
-3. Windows Codex에서 플러그인을 설치합니다.
+Windows Codex에서 플러그인을 설치하려면 이어서 실행합니다.
 
 ```powershell
 codex plugin marketplace add .
@@ -144,9 +154,26 @@ ContextGC는 다음을 주장하지 않습니다.
 - token을 실제 ChatGPT/Codex credits로 변환
 - Git, 파일, 명령 또는 외부 부작용 rollback
 
+ContextGC는 native compaction을 시작하지 않습니다. 신뢰한 `PreCompact`
+hook은 host가 시작한 automatic compaction에 대해 checkpoint, snapshot과
+hook-state 무결성을 확인한 뒤 진행을 허용하거나 차단할 수 있습니다.
+
 OpenAI는 ChatGPT 인증 Codex 사용량에 대한 결정론적 token-to-credit 환산식을
 공개하지 않았습니다. ContextGC는 raw token 범주와 명시적 usage proxy를
 구분하고 `codexCredits: null`을 유지합니다.
+
+지속화 전 deterministic redaction이 exact 보존보다 우선합니다. protected
+exact 값이 redaction되면 원래 bytes는 checkpoint에서 복구할 수 없고, 해당
+source는 protected exact EXTERNALIZE 대상으로 취급할 수 없습니다.
+
+### Codex memory와의 공존
+
+Codex가 관리하는 memory와 ContextGC는 서로 다른 계층입니다. Native memory는
+여러 대화에 걸친 참고용 회상이고, ContextGC는 compaction 전후의 제한된
+Task Frame과 무결성이 검증된 근거 포인터를 보존합니다. ContextGC는 native
+memory를 읽거나 수정·중복 제거하지 않으며 checkpoint 근거로 신뢰하지도
+않습니다. Codex memory나 모델이 업데이트되면 회상된 지침이 현재 저장소 및
+최신 검증 Task Frame과 충돌하지 않는지 확인하십시오.
 
 ## 검증된 synthetic benchmark
 
@@ -156,7 +183,7 @@ OpenAI는 ChatGPT 인증 Codex 사용량에 대한 결정론적 token-to-credit 
 | 정책 | UPVS ↓ | 검증 성공 | Critical retention | 수동 개입 |
 | --- | ---: | ---: | ---: | ---: |
 | 고정된 수동 schedule | **59,884.67** | 3/3 | 100% | 6 |
-| 75% 고정 임계값 | 67,653.67 | 3/3 | 100% | 0 |
+| 75% 고정 임계값 + cooldown | 67,653.67 | 3/3 | 100% | 0 |
 | ContextGC adaptive | 65,488.33 | 3/3 | 100% | 0 |
 
 Adaptive UPVS는 fixed보다 3.20% 낮지만 manual보다 9.36% 높습니다. 따라서
@@ -171,15 +198,22 @@ ContextGC를 토큰 절약 우승자가 아니라 safety/audit controller로 배
 
 - 검증 플랫폼: Windows PowerShell
 - Node.js: 22.13 이상
-- 설치 검증에 사용한 Codex CLI: 0.144.5
-- transcript telemetry allowlist: Codex `0.144.x`, `0.145.0-alpha.x`
+- 설치·lifecycle 검증에 사용한 Codex CLI: 0.145.0
+- transcript telemetry allowlist: Codex `0.144.x`, `0.145.0-alpha.x`, 정확히
+  `0.145.0` stable
+
+`v0.1.9` tag가 검토한 source를 고정합니다. prebuilt bundle이나 hook을
+신뢰하기 전에 [release hash manifest](release/v0.1.9.sha256)를 확인하십시오.
+`/hooks`와 clone의 일치는 명령 parity를 확인하고, tag와 manifest는 검토한
+source와 bytes를 식별합니다.
 
 플러그인 설치만으로 bundled hook이 신뢰되지는 않습니다. 설치 또는 업데이트 후
 새 thread를 시작하고 `/hooks`에서 정의를 검토하십시오.
 
 정상 설치에서는 모든 MCP 호출에서 `dataDir`를 생략합니다. ContextGC가
-플러그인 전용 local store를 선택하고 model-visible 결과에는 opaque `storeId`만
-반환합니다.
+플러그인 전용 local store를 선택합니다. 주입된 Task Frame은 같은 digest를
+`contextgcStoreId`로 표시하고 MCP structured result는 `storeId`로 표시합니다.
+둘 다 경로나 권한 token이 아닌 opaque correlation 값입니다.
 
 ## MCP와 CLI
 

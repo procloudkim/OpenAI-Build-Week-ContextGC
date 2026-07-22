@@ -1,13 +1,14 @@
-# Final submission runbook
+# Final submission and release record
 
 This file is safe to commit. It contains no private session value, account
 identifier, local path, or credential. Keep all values marked `UI_ONLY` out of
 the repository, screenshots, video, issues, and public chat.
 
-The official deadline is **July 21, 2026 at 5:00 PM Pacific Time**. That is
-**July 22, 2026 at 9:00 AM Korea Standard Time**. Re-open the live rules before
-submission rather than relying only on this conversion. Aim to reach Submitted
-three hours earlier.
+The official deadline was **July 21, 2026 at 5:00 PM Pacific Time**
+(**July 22, 2026 at 9:00 AM Korea Standard Time**). The owner reported the
+Devpost entry submitted. This document now preserves the privacy and release
+checks for the public `v0.1.9` source; it is not proof of Devpost's private UI
+state.
 
 ## 1. Freeze the candidate
 
@@ -22,7 +23,7 @@ node scripts/contextgc.bundle.mjs simulate
 ```
 
 - [ ] Confirm the receipt hash matches the site and checked-in report.
-- [ ] Do not change plugin bytes under version `0.1.5`. Any plugin-byte change
+- [ ] Do not change plugin bytes under version `0.1.9`. Any plugin-byte change
       requires a new version, restaging, reinstall, and trust review.
 
 ## 2. Privacy gate before publication
@@ -52,7 +53,7 @@ Required checks:
 The public release branch prepared by this repository is:
 
 ```text
-public-release-v0.1.5
+submission-release-v0.1.9
 ```
 
 Before pushing it, verify that it has one reachable commit and that its tree is
@@ -64,7 +65,7 @@ Choose exactly one path.
 
 ### Preferred: public open-source repository
 
-- [ ] Push only `public-release-v0.1.5` to the public repository's `main`.
+- [ ] Push only `submission-release-v0.1.9` to the public repository's `main`.
 - [ ] Confirm MIT `LICENSE` is visible.
 - [ ] Open the repository in a signed-out/private browser.
 - [ ] Test a fresh anonymous clone.
@@ -102,10 +103,10 @@ Target 2:30–2:50. Judges are not required to watch beyond three minutes.
 - [ ] Distinguish the synthetic site from the installed plugin.
 - [ ] Do not claim live credit savings.
 - [ ] Do not expose private identifiers or local paths.
-- [ ] Upload to YouTube early and wait for processing.
-- [ ] Use public visibility as required by the official rules.
+- [ ] Upload to the Vimeo destination selected by the owner and wait for processing.
+- [ ] Use the visibility accepted by the submitted Devpost form.
 - [ ] Watch the processed upload with sound from beginning to end.
-- [ ] Paste and reopen the final YouTube URL in Devpost.
+- [ ] Paste and reopen the final Vimeo URL in Devpost; do not commit it here.
 
 ## 6. Devpost fields
 
@@ -133,9 +134,9 @@ Target 2:30–2:50. Judges are not required to watch beyond three minutes.
       boundaries.
 - [ ] Confirm all submitted materials are English or include an English
       translation.
-- [ ] Submit before the buffer time.
-- [ ] Open **My Projects** and confirm the project is labeled **Submitted**, not
-      Draft.
+- [x] Owner reported submission before the deadline.
+- [x] Owner reported the project labeled **Submitted**, not Draft. This remains
+      a user-attested UI result rather than independently reproducible evidence.
 - [ ] Save a private proof of the submitted state without publishing account or
       session information.
 

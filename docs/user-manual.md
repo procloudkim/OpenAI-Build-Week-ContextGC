@@ -4,14 +4,14 @@
 
 | Field | Value |
 | --- | --- |
-| Product | ContextGC 0.1.8 |
+| Product | ContextGC 0.1.9 |
 | Manual type | Windows installation and operations tutorial |
 | Target reader | A Windows Codex user installing ContextGC from its public repository |
 | Reader job | Install ContextGC, trust it deliberately, create and recover a task-context checkpoint, and manage the installation without confusing context recovery with source-code recovery |
-| Prerequisites | Git, Node.js 22.13.0 or newer, and Codex CLI with plugin support |
+| Prerequisites | Git, Node.js 22.13.0 or newer, and a Codex CLI with plugin support; `0.145.0` is the validated baseline, not an unconditional hard requirement |
 | Scope boundary | Local ContextGC checkpoints, evidence references, and plugin operations; not Codex native compaction control, Git rollback, or ChatGPT/Codex credit accounting |
-| Done when | A new Codex thread can see ContextGC, the six MCP tools are available, one checkpoint ID is returned, and hook/tool output agrees on one opaque `storeId` without exposing its path |
-| Freshness date | 2026-07-19 |
+| Done when | The plugin is installed and enabled; reviewed hooks are trusted and active in a new thread; `/mcp` exposes the six tools; one checkpoint ID matches status; Task Frame `contextgcStoreId` matches MCP `storeId` without exposing its path; and the deterministic CLI smoke test passes |
+| Freshness date | 2026-07-23 |
 
 ## Reader promise
 
@@ -80,6 +80,12 @@ Expected observables:
 - Codex prints its version.
 - `codex plugin --help` lists `add`, `list`, `marketplace`, and `remove`.
 
+Codex CLI `0.145.0` is the validated installation and transcript-telemetry
+baseline. It is not a blanket requirement for later releases: on any other
+version, use the compatibility matrix and repeat plugin, MCP, skill, and hook
+discovery. Unknown transcript schemas disable telemetry-derived policy actions
+instead of being guessed.
+
 If the Node version is older than 22.13.0, update Node before continuing. If
 the `plugin` subcommand is absent, update the Codex CLI using the current
 official Codex installation guidance. Do not work around either prerequisite
@@ -93,8 +99,16 @@ Clone over HTTPS; no repository credential belongs in the checkout or prompt:
 
 ```powershell
 Set-Location C:\path\to\your\projects
-git clone https://github.com/procloudkim/OpenAI-Build-Week-ContextGC.git context-gc
+git clone --branch v0.1.9 --depth 1 https://github.com/procloudkim/OpenAI-Build-Week-ContextGC.git context-gc
 Set-Location .\context-gc
+$manifest = Get-Content .\release\v0.1.9.sha256
+foreach ($line in $manifest) {
+  if ($line -notmatch '^([a-f0-9]{64})  (.+)$') { throw 'Malformed hash manifest.' }
+  $expected, $path = $Matches[1], $Matches[2]
+  $actual = (Get-FileHash -Algorithm SHA256 -LiteralPath $path).Hash.ToLowerInvariant()
+  if ($actual -ne $expected) { throw "Hash mismatch: $path" }
+}
+'releaseHashesVerified=True'
 git rev-parse --show-toplevel
 git status --short
 ```
@@ -106,8 +120,13 @@ Expected observables:
 
 - `git rev-parse --show-toplevel` ends in `context-gc`.
 - `git status --short` prints nothing for a fresh, clean clone.
+- the checksum loop prints `releaseHashesVerified=True`; stop on any mismatch.
 - `.agents\plugins\marketplace.json` and
   `plugins\context-gc\.codex-plugin\plugin.json` exist.
+
+The checksum step verifies local consistency with the tagged manifest. It does
+not authenticate the publisher because the tag and manifest are not
+cryptographically signed.
 
 If Git reports that the repository does not exist, confirm the public URL and
 network access. Do not paste access tokens into this repository or into Codex
@@ -125,15 +144,17 @@ git branch --show-current
 
 If `git status --short` shows changes, stop and commit, move, or otherwise
 resolve them intentionally. Do not hide unknown work with an automatic reset.
-When the clone is clean, update without creating a merge commit:
+When the clone is clean, fetch and select the reviewed release tag:
 
 ```powershell
-git pull --ff-only
+$targetVersion = 'v0.1.9'
+git fetch --tags --prune
+git checkout --detach $targetVersion
 ```
 
-Expected observable: Git reports an up-to-date branch or a fast-forward update.
-If `--ff-only` fails, resolve the branch divergence before installing from that
-clone.
+Expected observable: `HEAD` identifies the reviewed tag. Change
+`$targetVersion` only after reviewing a newer release; do not install from an
+unrelated mutable branch by accident.
 
 ## 3. Install ContextGC from the repository
 
@@ -178,6 +199,11 @@ hooks. This is a Codex safety boundary, not an installation error.
 5. Trust it only when the event list and commands match.
 6. After trusting it, start one more new thread by entering `/new` or by exiting
    and starting Codex again.
+
+Expected observable: `/hooks` no longer lists the reviewed ContextGC definition
+as pending or skipped and reports it active for the current definition hash.
+Exact labels can vary by Codex release; an unchanged pending/skipped state means
+the trust gate did not complete.
 
 The reviewed definition should contain these six lifecycle events:
 
@@ -263,7 +289,8 @@ repository.
 
 First inspect the current repository files and the latest test evidence. Omit
 dataDir from every ContextGC MCP call so the installed plugin selects its
-private local store. Compare only the opaque contextgcStoreId/storeId values;
+private local store. Compare only the opaque Task Frame `contextgcStoreId` and
+MCP `storeId` values;
 never request, announce, or paste the absolute path.
 
 Build a concise Task Frame containing only verified facts: goal, constraints,
@@ -291,6 +318,13 @@ Expected observables:
 - The frame names current files and test evidence that can be checked in the
   repository; it does not treat remembered text as authority.
 - No response claims that `/compact` ran or that credits were calculated.
+
+If no archive operation ran, report archive redaction status as
+`not-applicable`, not zero. Redaction takes precedence over exact retention: a
+protected exact value changed by minimization is not recoverable and cannot
+support protected exact EXTERNALIZE advice. If the model does not create
+exactly one checkpoint, do not infer success; inspect `/mcp`, restate the
+explicit one-checkpoint request, and verify the result with read-only status.
 
 After creation, start a new thread and confirm that trusted `SessionStart`
 context names the same `contextgcStoreId` and checkpoint ID. If it names a
@@ -432,7 +466,7 @@ $Adaptive = $Result.data.aggregates | Where-Object policy -eq "A_ADAPTIVE"
 } | Format-List
 ```
 
-For ContextGC 0.1.8 with the checked-in fixtures, the exact observable is:
+For ContextGC 0.1.9 with the checked-in fixtures, the exact observable is:
 
 ```text
 ok                          : True
@@ -479,13 +513,20 @@ Expected cleanup observable: `False`.
 ```powershell
 Set-Location C:\path\to\context-gc
 git status --short
-git pull --ff-only
+$targetVersion = 'v0.1.9'
+git fetch --tags --prune
+git checkout --detach $targetVersion
 codex plugin add context-gc@context-gc-local
 codex plugin list
 ```
 
 Expected observable: the installed ContextGC row shows the version declared by
 the updated `plugins\context-gc\.codex-plugin\plugin.json`.
+
+If the installed row remains stale, close active Codex processes and back up
+the private store before running `plugin remove` followed by `plugin add`. The
+add-only path was verified for `0.1.9`; do not overwrite the versioned cache by
+hand.
 
 Start a new thread after reinstalling. If the hook definition changed, Codex
 requires you to inspect and trust the new definition again; repeat the `/hooks`
@@ -509,41 +550,88 @@ for full verification before distributing a change.
 
 ## 12. Uninstall and decide what to retain
 
-Before uninstalling, ask ContextGC for status and record the opaque `storeId`
-and any checkpoint IDs you intend to keep. Do not put an absolute path in the
-record. Then remove the plugin:
+Plugin removal and data erasure are separate decisions. Before removal, call
+`contextgc_status` in the trusted thread and privately record its opaque
+`storeId` plus the checkpoint IDs you need. Never put the absolute path in that
+record. Then close Codex so no writer remains.
+
+Resolve the installed store locally and bind it to the recorded ID. Copy the
+installed ContextGC `PATH` from `codex plugin list`; do not paste either path
+into a prompt, issue, screenshot, or report.
+
+```powershell
+$expectedStoreId = 'PASTE THE 16-HEX STORE ID FROM contextgc_status'
+$contextGcPluginRoot = 'PASTE THE INSTALLED CONTEXTGC PATH'
+if ($expectedStoreId -notmatch '^[a-f0-9]{16}$') { throw 'Invalid expected storeId.' }
+$bundle = Join-Path $contextGcPluginRoot 'scripts\contextgc.bundle.mjs'
+$rawStatus = node $bundle status --cwd $contextGcPluginRoot --compact
+if ($LASTEXITCODE -ne 0) { throw "ContextGC status failed: $LASTEXITCODE" }
+$localStatus = $rawStatus | ConvertFrom-Json
+$dataDir = [IO.Path]::GetFullPath([string]$localStatus.data.root)
+$normalized = if ($env:OS -eq 'Windows_NT') {
+  $dataDir.ToLower([Globalization.CultureInfo]::GetCultureInfo('en-US'))
+} else { $dataDir }
+$sha = [Security.Cryptography.SHA256]::Create()
+try {
+  $hex = [BitConverter]::ToString(
+    $sha.ComputeHash([Text.Encoding]::UTF8.GetBytes($normalized))
+  ).Replace('-', '').ToLowerInvariant()
+} finally { $sha.Dispose() }
+$computedStoreId = $hex.Substring(0, 16)
+if ($computedStoreId -cne $expectedStoreId) {
+  throw 'Store mismatch; abort backup, uninstall, and erasure.'
+}
+$localStatus.data | Select-Object initialized,latestCheckpointId,latestCheckpointStatus,checkpointCount
+```
+
+Here `--compact` only formats JSON. If the data must survive uninstall, copy it
+to an already approved encrypted absolute location and verify every file before
+continuing:
+
+```powershell
+$approvedEncryptedBackupRoot = 'E:\approved-encrypted-contextgc-backups'
+if (-not [IO.Path]::IsPathFullyQualified($approvedEncryptedBackupRoot)) {
+  throw 'Backup root must be an approved absolute path.'
+}
+New-Item -ItemType Directory -Path $approvedEncryptedBackupRoot -Force | Out-Null
+$backupDir = Join-Path $approvedEncryptedBackupRoot ('contextgc-' + (Get-Date -Format 'yyyyMMdd-HHmmss'))
+Copy-Item -LiteralPath $dataDir -Destination $backupDir -Recurse
+$sourceRoot = [IO.Path]::GetFullPath($dataDir).TrimEnd('\')
+$copiedRoot = [IO.Path]::GetFullPath($backupDir).TrimEnd('\')
+$manifestFor = {
+  param($root)
+  @(Get-ChildItem -LiteralPath $root -Recurse -File | ForEach-Object {
+    [pscustomobject]@{
+      Relative = $_.FullName.Substring($root.Length + 1)
+      Length = $_.Length
+      Hash = (Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash
+    }
+  } | Sort-Object Relative)
+}
+$sourceManifest = & $manifestFor $sourceRoot
+$backupManifest = & $manifestFor $copiedRoot
+if (Compare-Object $sourceManifest $backupManifest -Property Relative,Length,Hash) {
+  throw 'Backup verification failed; keep the source and plugin unchanged.'
+}
+"verifiedBackup=true files=$($sourceManifest.Count)"
+```
+
+ContextGC cannot verify destination encryption; without BitLocker, EFS, or an
+equivalent approved control, the copy is plaintext. Only after ID matching and,
+when retention matters, a verified backup, remove the plugin:
 
 ```powershell
 codex plugin remove context-gc@context-gc-local
 codex plugin list
-```
-
-Expected observable: the ContextGC entry is no longer installed. Close active
-threads that loaded the plugin and start a new one before testing the absence.
-
-If you no longer want Codex to track the local marketplace either:
-
-```powershell
 codex plugin marketplace remove context-gc-local
 codex plugin marketplace list
 ```
 
-Plugin removal and ContextGC data erasure are separate decisions. ContextGC
-does not expose an automatic deletion command and does not automatically delete
-persisted non-secret evidence. Do not assume uninstall is a secure-erasure
-operation.
-
-Choose one data-retention action:
-
-- **Keep:** retain the installation-managed private store if checkpoint
-  recovery or audit history is still useful. Protect it as plaintext sensitive
-  project data.
-- **Back up, then remove:** close Codex, resolve the store locally through an
-  approved administrative workflow, copy it to encrypted backup, verify the
-  copy, and then remove only the original store.
-- **Erase:** close Codex, resolve and inspect the exact store locally, then
-  delete only that directory. Never publish the path or delete its parent, a
-  repository root, `%USERPROFILE%`, or a path copied from a prompt.
+Expected observable: ContextGC is absent from the installed plugin list. If
+erasure is intended, inspect and delete only the exact `$dataDir` after plugin
+removal using the normal OS workflow. Never delete its parent, a repository
+root, the user profile, or the Codex home directory. ContextGC intentionally
+provides no recursive-delete command and uninstall is not secure erasure.
 
 Detected values that were redacted are not present as recoverable original
 bytes in ContextGC. Credential, email, international/grouped-phone, and
@@ -607,7 +695,7 @@ and earlier context is not automatically recovered.
 | Archive | Local content-addressed storage for selected evidence after any intentional redaction |
 | Checkpoint | A manifest plus canonical Task Frame whose bytes are verified by hash |
 | `ContentRef` | A SHA-256 reference recording hash, byte count, media type, scan state, and redaction count |
-| `contextgcStoreId` | Opaque store identifier rendered by a trusted hook; compare it with MCP `storeId` without revealing a path |
+| `contextgcStoreId` | Opaque store identifier rendered inside the Task Frame injected by a trusted hook; compare it with MCP `storeId` without revealing a path |
 | `dataDir` | Advanced explicit absolute-path override; omit in normal installed use and never paste the value into shared output |
 | EXTERNALIZE | Keep evidence outside the inline frame through a reversible archive reference |
 | KEEP | Retain an atom directly in the working context representation |

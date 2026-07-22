@@ -25,22 +25,23 @@
 
 ## Human-required evidence
 
-- [ ] Verify anonymous access to the public GitHub repository. The planned URL
-      returned 404 during the 2026-07-21 preflight and is not release proof.
+- [x] An unauthenticated HTTP GET to the public GitHub repository returned
+      `200` on 2026-07-23. This is a dated access check, not a future guarantee.
 - [ ] Push only the clean public release branch; do not publish private history,
       private refs, or local author metadata.
-- [ ] Change the selected Sites delivery mode to public and verify the demo from
-      a signed-out browser.
+- [x] An unauthenticated HTTP GET to the demo returned `200` on 2026-07-23;
+      browser interaction QA remains covered by the automated/local receipts.
 - [ ] `USER_REQUIRED`: run `/feedback` on the primary Codex implementation
       session and enter its Session ID only in the Devpost UI. Never commit it.
-- [ ] `USER_REQUIRED`: record narration and upload a public, under-three-minute
-      YouTube video.
+- [x] Owner reported completing Devpost submission with the selected Vimeo
+      video. Its private submission URL is intentionally not committed.
 - [ ] `USER_REQUIRED`: confirm every team invitation is accepted, or confirm the
       submission is solo.
 - [ ] Paste and re-open the public repository and demo URLs in Devpost.
 - [ ] `USER_REQUIRED`: review the official rules and announcements immediately
       before submission.
-- [ ] `USER_REQUIRED`: confirm the Devpost entry is `Submitted`, not draft.
+- [x] Owner reported the Devpost entry is `Submitted`, not draft; this is a
+      user-attested private-UI result.
 
 ## Claim gate
 
@@ -60,7 +61,7 @@
 - [x] Committed acceptance evidence omits raw checkpoint and store identifiers.
 - [x] `.env`, key, certificate, log, local ContextGC state and deployment-state
       directories are ignored.
-- [ ] Inspect the final video frame-by-frame for profile UI, notifications,
-      terminal title bars, user directories and account identifiers.
+- [ ] The owner retains responsibility for the final Vimeo frame-by-frame
+      privacy review; no video URL or private review receipt is committed.
 - [ ] Re-run the release-tree and public-branch metadata scan immediately before
       push.

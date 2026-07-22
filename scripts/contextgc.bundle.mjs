@@ -16739,11 +16739,15 @@ function parseArgs(argv) {
 var HELP_TEXT = `ContextGC - local, reversible context control for Codex
 
 Usage:
-  contextgc status [--cwd PATH] [--data-dir PATH]
+  contextgc status
   contextgc simulate [--fixtures PATH] [--output PATH]
   contextgc checkpoint [--frame FILE|-] [--reason TEXT] [--source-session-id ID]
   contextgc restore CHECKPOINT_ID
   contextgc report [--receipt FILE]
+
+Runtime selection options (all non-help commands):
+  --cwd PATH       Resolve relative inputs and fallback data from PATH
+  --data-dir PATH  Select the ContextGC data directory explicitly
 
 Global output options:
   --pretty        Pretty JSON output (default)
@@ -17647,7 +17651,11 @@ import { access, readdir as readdir2 } from "node:fs/promises";
 import { createReadStream } from "node:fs";
 import { createInterface } from "node:readline";
 var CODEX_TRANSCRIPT_SCHEMA_ID = "codex-rollout-jsonl/event-msg-v1";
-var SUPPORTED_CODEX_CLI_VERSIONS = ["0.144.x", "0.145.0-alpha.x"];
+var SUPPORTED_CODEX_CLI_VERSIONS = [
+  "0.144.x",
+  "0.145.0-alpha.x",
+  "0.145.0"
+];
 var KNOWN_TOP_LEVEL_TYPES = /* @__PURE__ */ new Set([
   "session_meta",
   "event_msg",
@@ -17736,7 +17744,7 @@ async function readCodexTranscriptTelemetry(path3) {
   };
 }
 function isSupportedCodexCliVersion(version2) {
-  return /^0\.144\.\d+(?:[-+][0-9A-Za-z.-]+)?$/.test(version2) || /^0\.145\.0-alpha\.\d+$/.test(version2);
+  return /^0\.144\.\d+(?:[-+][0-9A-Za-z.-]+)?$/.test(version2) || /^0\.145\.0-alpha\.\d+$/.test(version2) || version2 === "0.145.0";
 }
 function parseUsage(value, lineNumber, field) {
   if (!isRecord(value)) {
@@ -17941,7 +17949,7 @@ var defaultRuntimeFactory = (options) => {
 };
 
 // dist/src/cli/version.js
-var CONTEXT_GC_VERSION = "0.1.8";
+var CONTEXT_GC_VERSION = "0.1.9";
 
 // dist/src/cli/commands.js
 function runtimeOptions(args, io) {

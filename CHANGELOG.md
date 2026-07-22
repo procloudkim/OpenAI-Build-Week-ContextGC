@@ -4,6 +4,33 @@ All notable ContextGC changes are recorded here. Dates use ISO 8601.
 
 ## Unreleased
 
+No unreleased changes.
+
+## [0.1.9] - 2026-07-23
+
+### Added
+
+- Add a sanitized Codex CLI `0.145.0` transcript fixture covering the observed
+  stable session envelope, cumulative token categories, and compaction event.
+- Document the boundary between host-managed Codex memories and ContextGC's
+  local, integrity-verified Task Frame.
+
+### Changed
+
+- Allowlist the exact Codex CLI `0.145.0` stable transcript schema after local
+  shape validation. Later `0.145.x` patches and `0.146+` remain fail-closed
+  until separately verified.
+- Refresh package, plugin, CLI, and compatibility documentation to `0.1.9`.
+
+### Fixed
+
+- Pin public installation paths to tag `v0.1.9`, publish release artifact
+  hashes, and link the full deterministic receipt hash.
+- Align English and Korean clone, discovery, update, backup, redaction, store
+  identifier, and native-compaction boundaries after zero-context cold reads.
+- Make local store resolution actionable without placing private paths in
+  prompts or public reports.
+
 ## [0.1.8] - 2026-07-21
 
 ### Fixed

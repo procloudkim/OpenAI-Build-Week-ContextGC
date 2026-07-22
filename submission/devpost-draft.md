@@ -139,12 +139,12 @@ token receipts are the next measurement milestone.
 
 - Repository: https://github.com/procloudkim/OpenAI-Build-Week-ContextGC
 - Live demo: https://contextgc-build-week.trytrytry.chatgpt.site
-- Video: `UI_ONLY: paste final public YouTube URL`
+- Video: `UI_ONLY: retained only in the submitted Devpost form; do not commit the URL`
 - Codex `/feedback` Session ID: `UI_ONLY`
 
 ## Required final checks
 
-Re-open the live [rules](https://openai.devpost.com/rules),
-[updates](https://openai.devpost.com/updates), and announcements immediately
-before submission. Confirm repository access, video processing and voiceover,
-team invitation status, and the green **Submitted** state in My Projects.
+The owner reported completing submission. For any organizer-requested revision,
+re-open the live [rules](https://openai.devpost.com/rules),
+[updates](https://openai.devpost.com/updates), and announcements first. Keep the
+video URL and `/feedback` Session ID in Devpost UI only.

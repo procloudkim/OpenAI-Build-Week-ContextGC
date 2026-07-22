@@ -7,15 +7,18 @@ body:
     attributes:
       value: |
         Do not paste transcripts, Task Frames, archive objects, credentials,
-        session IDs, account IDs, or complete private paths. Use SECURITY.md
-        for integrity, disclosure, path, or prompt-injection vulnerabilities.
+        session/account/checkpoint IDs, or complete private paths. An opaque
+        storeId may be included only when correlation is necessary. Use
+        SECURITY.md when you suspect unauthorized disclosure, path escape,
+        integrity bypass, or persistent prompt injection; ordinary validation
+        errors remain appropriate here with synthetic input.
 
   - type: input
     id: versions
     attributes:
       label: Versions
-      description: ContextGC, Codex CLI, Node.js, Windows version
-      placeholder: ContextGC 0.1.5; Codex CLI 0.144.5; Node 24.18.0; Windows 11
+      description: Applicable ContextGC, Codex CLI/app, Node.js, OS, shell, and installation method
+      placeholder: ContextGC x.y.z; Codex CLI x.y.z; Node x.y.z; OS and shell; repository or plugin install
     validations:
       required: true
 
@@ -58,12 +61,18 @@ body:
     validations:
       required: true
 
+  - type: textarea
+    id: state
+    attributes:
+      label: Sanitized state
+      description: Optional enabled/trust state, latestCheckpointStatus, dataDirSource/boundary, receipt provenance, and whether synthetic input reproduces it. Do not include paths or stored content.
+
   - type: checkboxes
     id: privacy
     attributes:
       label: Privacy check
       options:
-        - label: I removed transcripts, secrets, identifiers, proprietary data, and private absolute paths.
+        - label: I removed transcripts, secrets, raw session/account/checkpoint identifiers, proprietary data, and private absolute paths.
           required: true
-        - label: This report does not describe a vulnerability that belongs in SECURITY.md.
+        - label: I do not suspect an unauthorized disclosure, path escape, integrity bypass, or persistent prompt injection that belongs in SECURITY.md.
           required: true

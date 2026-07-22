@@ -1,6 +1,6 @@
 # ContextGC architecture
 
-ContextGC is a local-first control plane around Codex context compaction. It does
+ContextGC is a local-persistence control plane around Codex context compaction. It does
 not replace Codex's encrypted native compaction state and it does not promise to
 invoke `/compact` in arbitrary existing Codex threads.
 
@@ -45,8 +45,11 @@ preparation decision, not a native compaction command.
 
 ### Local runtime
 
-The runtime stores data below `.contextgc/` by default or below an explicitly
-configured data directory. It provides:
+The runtime selects a store from an explicit/configured root, `PLUGIN_DATA`,
+`CONTEXTGC_HOME`, or a conservatively inferred installed-plugin data location.
+An ordinary working-directory `.contextgc/` is a read-only/status fallback: it
+cannot authorize writes. Mutations require one of the reviewed store sources
+above. The runtime provides:
 
 - append-only JSONL events;
 - SHA-256 addressed immutable, sanitized source objects;
@@ -80,7 +83,7 @@ The plugin combines a skill, MCP tools and trusted lifecycle hooks.
   Tool-count and elapsed-time pressure are evaluated only at the real
   `PreCompact` boundary. If recent work is not represented by the verified
   checkpoint, freshness is recorded as an advisory coverage gap; the hook
-  preserves a byte-verified fallback and allows native compaction. Missing or
+  preserves a byte-verified fallback and permits host-initiated native compaction. Missing or
   invalid checkpoints and failed snapshot/state persistence remain fail-closed.
 
 Every user-visible hook notice is limited to three lines and 240 characters.

@@ -1,0 +1,4 @@
+{"timestamp":"2026-07-23T00:00:00.000Z","type":"session_meta","payload":{"session_id":"synthetic-session-0.145.0","id":"synthetic-session-0.145.0","timestamp":"2026-07-23T00:00:00.000Z","cwd":"workspace","originator":"codex_cli_rs","cli_version":"0.145.0","source":"cli","history_mode":"save-all","context_window":258400}}
+{"timestamp":"2026-07-23T00:00:01.000Z","type":"world_state","payload":{"kind":"synthetic"}}
+{"timestamp":"2026-07-23T00:00:02.000Z","type":"event_msg","payload":{"type":"token_count","info":{"total_token_usage":{"input_tokens":240,"cached_input_tokens":160,"cache_write_input_tokens":20,"output_tokens":12,"reasoning_output_tokens":4,"total_tokens":252},"last_token_usage":{"input_tokens":40,"cached_input_tokens":20,"cache_write_input_tokens":5,"output_tokens":3,"reasoning_output_tokens":1,"total_tokens":43},"model_context_window":258400}}}
+{"timestamp":"2026-07-23T00:00:03.000Z","type":"event_msg","payload":{"type":"context_compacted"}}

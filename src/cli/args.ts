@@ -140,11 +140,15 @@ export function parseArgs(argv: readonly string[]): ParsedArgs {
 export const HELP_TEXT = `ContextGC - local, reversible context control for Codex
 
 Usage:
-  contextgc status [--cwd PATH] [--data-dir PATH]
+  contextgc status
   contextgc simulate [--fixtures PATH] [--output PATH]
   contextgc checkpoint [--frame FILE|-] [--reason TEXT] [--source-session-id ID]
   contextgc restore CHECKPOINT_ID
   contextgc report [--receipt FILE]
+
+Runtime selection options (all non-help commands):
+  --cwd PATH       Resolve relative inputs and fallback data from PATH
+  --data-dir PATH  Select the ContextGC data directory explicitly
 
 Global output options:
   --pretty        Pretty JSON output (default)

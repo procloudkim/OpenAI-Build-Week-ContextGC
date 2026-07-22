@@ -2,29 +2,37 @@
 
 ## Reference contract
 
-- **Audience:** users and maintainers who need exact commands, inputs, side
-  effects, limits, and compatibility boundaries.
-- **Scope:** ContextGC `0.1.8` as verified on 2026-07-21.
+- **Audience:** users and maintainers who need operational commands, primary
+  inputs, side effects, limits, and compatibility boundaries.
+- **Scope:** ContextGC `0.1.9` as verified on 2026-07-23.
 - **Command convention:** user-facing CLI examples invoke the checked-in bundle
   with `node scripts/contextgc.bundle.mjs`. A bare `contextgc` command is
   available only in a development installation that explicitly links the npm
   package.
 - **Authority:** source and tests override this reference if they diverge. File
   a documentation issue when that happens.
+- **Schema boundary:** this is a human-readable contract, not a generated JSON
+  schema. Complete MCP validators live in `src/mcp/server.ts`, CLI grammar in
+  `src/cli/args.ts`, and executable result contracts in `tests/mcp.test.ts` and
+  `tests/cli.test.ts`.
 
 ## Compatibility matrix
 
 | Component | Verified or supported range | Behavior outside the range |
 | --- | --- | --- |
-| ContextGC | `0.1.8` | Recheck this reference and release notes |
-| Node.js | `>=22.13.0`; verified with `24.18.0` | Package engine is unsupported |
+| ContextGC | `0.1.9` | Recheck this reference and release notes |
+| Node.js | `>=22.13.0`; verified with `24.18.0` | Outside the declared package engine range; update Node before use |
 | npm | Verified with `11.16.0` | Use the lockfile-compatible npm shipped with a supported Node release |
-| Codex CLI installation/discovery | Verified with `0.144.5` | Re-run plugin, MCP, skill, and hook discovery checks |
-| Transcript telemetry adapter | `0.144.x`, `0.145.0-alpha.x` | Transcript-derived automatic decisions fail closed; checkpoint tools remain available |
+| Codex CLI installation/discovery | Verified with `0.145.0` | Re-run plugin, MCP, skill, and hook discovery checks |
+| Transcript telemetry adapter | `0.144.x`, `0.145.0-alpha.x`, exact `0.145.0` stable | Transcript-derived automatic decisions fail closed; checkpoint tools remain available |
 | Primary shell | Windows PowerShell | Other shells require equivalent quoting and path handling |
 
 “Compatible newer Codex” is not assumed. Plugin packaging can still work while
 the guarded transcript telemetry adapter rejects an unknown schema.
+
+ContextGC never initiates native compaction. Its trusted `PreCompact` hook can
+permit or block a host-initiated automatic compaction according to verified
+checkpoint, snapshot, and hook-state integrity.
 
 ## Private store contract
 
@@ -42,10 +50,11 @@ configured or installed-plugin store fails with `dataDir is required unless
 ContextGC has a configured or installed-plugin data store`.
 
 Successful MCP and model-visible hook results identify the selected store with
-`storeId`, a 16-character lowercase hexadecimal digest. They do not return the
-absolute root. `storeId` is an opaque correlation identifier, not a path,
-credential, or authorization token. Users and agents should omit `dataDir` in
-normal installed use.
+one 16-character lowercase hexadecimal digest. The injected Task Frame labels
+it `contextgcStoreId`; MCP structured results label it `storeId`. They do not
+return the absolute root. The digest is an opaque correlation identifier, not
+a path, credential, or authorization token. Users and agents should omit
+`dataDir` in normal installed use.
 
 An explicit absolute `dataDir` remains an advanced per-call override. A
 relative override fails with `dataDir must be an absolute path`. Treat the
@@ -67,9 +76,9 @@ artifacts.
 ```
 
 Archives and checkpoints are plaintext. SHA-256 hashes provide integrity, not
-encryption. Match MCP and hook activity by `storeId`. Use the local CLI as an
-advanced administrative boundary when an absolute path must be inspected or
-deleted, and do not copy that path into a report.
+encryption. Match MCP `storeId` with the Task Frame's `contextgcStoreId`. Use
+the local CLI as an advanced administrative boundary when an absolute path must
+be inspected or deleted, and do not copy that path into a report.
 
 ## MCP tools
 
@@ -143,6 +152,11 @@ checkpoint may supersede it, but the unverified legacy checkpoint is not linked
 as its parent. Rebuild that checkpoint only from currently verified facts;
 earlier context is not automatically recovered.
 
+Redaction takes precedence over exact retention. If a protected exact value is
+changed by deterministic minimization, the original bytes are not recoverable
+from ContextGC and that source cannot support protected exact EXTERNALIZE
+advice.
+
 ## ContentRef
 
 | Field | Meaning |
@@ -167,15 +181,24 @@ returned by `contextgc_archive`; absent references are discarded.
 
 ```text
 node scripts/contextgc.bundle.mjs status [--cwd PATH] [--data-dir PATH]
-node scripts/contextgc.bundle.mjs simulate [--fixtures PATH] [--output PATH]
-node scripts/contextgc.bundle.mjs checkpoint [--frame FILE|-] [--reason TEXT]
-node scripts/contextgc.bundle.mjs restore CHECKPOINT_ID [--data-dir PATH]
-node scripts/contextgc.bundle.mjs report [--receipt FILE]
+node scripts/contextgc.bundle.mjs simulate [--fixtures PATH] [--output PATH] [--cwd PATH] [--data-dir PATH]
+node scripts/contextgc.bundle.mjs checkpoint [--frame FILE|-] [--reason TEXT] [--source-session-id ID] [--cwd PATH] [--data-dir PATH]
+node scripts/contextgc.bundle.mjs restore CHECKPOINT_ID [--cwd PATH] [--data-dir PATH]
+node scripts/contextgc.bundle.mjs report [--receipt FILE] [--cwd PATH] [--data-dir PATH]
 ```
 
 Global output flags are `--pretty` and `--compact`. There is no `--json` flag;
 successful non-help commands already return JSON. Exit code `0` means success,
 `2` means command usage error, and `1` means runtime failure.
+
+Every non-help CLI command accepts `--cwd` and `--data-dir`. Store-backed
+commands use explicit `--data-dir`, `PLUGIN_DATA`, `CONTEXTGC_HOME`, installed-
+cache inference, and the working-directory fallback implemented by the runtime.
+For `simulate`, that selection controls the default receipt output; for
+`report`, it controls the default receipt lookup. Unlike model-visible MCP
+status, local CLI `status` includes the exact root for administration.
+`--compact` only selects compact JSON formatting; it never invokes native
+compaction.
 
 | Command | Behavior | Expected observable |
 | --- | --- | --- |
@@ -202,8 +225,10 @@ session report. Use `--receipt <path>` when provenance must be explicit.
   frame.
 - **Restore:** select one known checkpoint as the latest frame mirror.
 - **Rollback:** operational shorthand for restoring a previously recorded
-  checkpoint ID. ContextGC `0.1.8` has no public checkpoint-list command, so
-  preserve important returned IDs.
+  checkpoint ID. ContextGC `0.1.9` has no public checkpoint-list command, so
+  preserve important returned IDs in a private local runbook or approved secret
+  manager. `status` can recover only the latest ID through the public surface;
+  do not publish checkpoint IDs.
 
 ## Plugin lifecycle commands
 

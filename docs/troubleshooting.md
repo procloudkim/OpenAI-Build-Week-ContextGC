@@ -20,6 +20,11 @@ codex mcp list
 git status --short --branch
 ```
 
+If only the installed plugin is available, start with `codex plugin list`,
+`codex mcp list`, and `/hooks`; do not assume the repository bundle exists.
+For an exact local store path, follow the local-only status workflow in
+[plugin installation](plugin-install.md#uninstall) without sharing its output.
+
 Share version numbers, enabled/disabled state, error class, and sanitized counts.
 Do not paste `events.jsonl`, raw Task Frames, archive objects, authentication
 output, or any absolute `dataDir` into a public issue. Share the opaque
@@ -62,7 +67,7 @@ Expected observable: the JSON contains both `context-gc` and `ContextGC` skill
 metadata. This command is an experimental diagnostic surface, not a stable user
 API.
 
-If metadata is absent, confirm plugin version `0.1.8`, reinstall, and start a
+If metadata is absent, confirm plugin version `0.1.9`, reinstall, and start a
 new thread. Do not manually overwrite the installed cache.
 
 ### Reinstall fails with Windows `Access denied`
@@ -85,7 +90,8 @@ changed, review and trust the new hash rather than bypassing trust globally.
 
 ### Status shows the wrong or empty store
 
-Compare the hook's opaque `contextgcStoreId` with MCP `storeId`. In normal
+Compare the injected Task Frame's opaque `contextgcStoreId` with MCP `storeId`.
+They are two labels for the same digest. In normal
 installed-plugin use, omit `dataDir`; the MCP server should report an inferred
 or configured source rather than a working-directory fallback.
 
@@ -132,10 +138,11 @@ Stop and preserve the store. Do not edit the manifest, Task Frame, or archive
 hash to make the error disappear.
 
 1. Confirm the exact store root.
-2. Record the checkpoint UUID or ContentRef hash.
-3. If you have a previously recorded checkpoint UUID, restore that specific
+2. Close writers and make a verified local copy before any restore mutation.
+3. Record the checkpoint UUID or ContentRef hash privately.
+4. If you have a previously recorded checkpoint UUID, restore that specific
    checkpoint.
-4. File a private security advisory with sanitized metadata only.
+5. File a private security advisory with sanitized metadata only.
 
 An integrity error can indicate corruption, incomplete copying, or tampering.
 
@@ -183,16 +190,17 @@ invariants fail.
 
 This was a `0.1.6` liveness regression: six tool events or twenty minutes could
 turn checkpoint freshness into a blocking integrity verdict. Upgrade to
-`0.1.8` or newer. The corrected hook snapshots the verified older Task Frame,
-allows native compaction, and reports the recent-work coverage gap without
+`0.1.7` or newer (`0.1.9` is the current documented release). The `0.1.7`
+correction snapshots the verified older Task Frame,
+permits the host-initiated compaction, and reports the recent-work coverage gap without
 interrupting the conversation. Missing, invalid, or unwritable recovery state
 still blocks.
 
 ### Transcript telemetry is unsupported
 
-ContextGC accepts only guarded transcript schemas for Codex `0.144.x` and
-`0.145.0-alpha.x`. Unknown versions disable transcript-derived automatic policy
-decisions rather than guessing.
+ContextGC accepts only guarded transcript schemas for Codex `0.144.x`,
+`0.145.0-alpha.x`, and the exact `0.145.0` stable release. Later versions
+disable transcript-derived automatic policy decisions rather than guessing.
 
 You may still create explicit checkpoints and use archive, status, rehydrate,
 and restore. Do not bypass the schema guard to make automation appear active.
@@ -204,10 +212,11 @@ selected data root has no receipt. Supply an explicit receipt path and inspect
 its provenance:
 
 ```powershell
-node scripts/contextgc.bundle.mjs report --receipt ".contextgc\receipts\latest.json"
+node scripts/contextgc.bundle.mjs report --receipt "output\benchmark\benchmark-report.json"
 ```
 
-A result containing the frozen receipt hash is synthetic regression evidence,
+This explicit path is the frozen synthetic receipt. A result containing its
+hash is regression evidence,
 not proof from the current Codex thread.
 
 ### Restore succeeded but files or Git did not change
@@ -219,29 +228,34 @@ recovery workflow for those side effects.
 
 ### The site works locally but judges cannot open it
 
-Build success and access policy are separate. The current Sites deployment may
-be owner-only. Verify the live access mode immediately before submission and
-obtain explicit owner approval before making it public.
+Build success and access policy are separate. An unauthenticated HTTP GET
+returned `200` on 2026-07-23, but hosting can change; recheck live access when a
+judge or release depends on it.
 
 ## Uninstall and data cleanup
 
-Remove the plugin and marketplace independently:
+Do not assume how a future Codex version handles plugin data. If the data must
+survive uninstall, perform the following before plugin removal:
+
+1. resolve the intended root with the local-only workflow in
+   [plugin installation](plugin-install.md#uninstall);
+2. record or export anything you must retain;
+3. close processes using that store;
+4. copy it to an approved encrypted location and compare relative paths, sizes,
+   and SHA-256 hashes.
+
+Then remove the plugin and marketplace independently:
 
 ```powershell
 codex plugin remove context-gc@context-gc-local
 codex plugin marketplace remove context-gc-local
 ```
 
-These commands do not delete checkpoints. Before deleting stored data:
+If erasure is intended, inspect and delete only the exact reviewed store using
+your normal OS workflow. Do not delete its parent, a repository root, the user
+profile, or the Codex home directory.
 
-1. run `status` against the intended root;
-2. record or export anything you must retain;
-3. close processes using that store;
-4. resolve and inspect the exact absolute path locally without copying it into
-   shared output;
-5. delete only that reviewed directory using your normal OS workflow.
-
-ContextGC intentionally has no recursive-delete command in release `0.1.8`.
+ContextGC intentionally has no recursive-delete command in release `0.1.9`.
 
 ## Escalation
 

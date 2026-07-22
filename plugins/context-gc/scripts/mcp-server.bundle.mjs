@@ -22709,7 +22709,11 @@ import { access, readdir as readdir2 } from "node:fs/promises";
 import { createReadStream } from "node:fs";
 import { createInterface } from "node:readline";
 var CODEX_TRANSCRIPT_SCHEMA_ID = "codex-rollout-jsonl/event-msg-v1";
-var SUPPORTED_CODEX_CLI_VERSIONS = ["0.144.x", "0.145.0-alpha.x"];
+var SUPPORTED_CODEX_CLI_VERSIONS = [
+  "0.144.x",
+  "0.145.0-alpha.x",
+  "0.145.0"
+];
 var KNOWN_TOP_LEVEL_TYPES = /* @__PURE__ */ new Set([
   "session_meta",
   "event_msg",
@@ -22798,7 +22802,7 @@ async function readCodexTranscriptTelemetry(path) {
   };
 }
 function isSupportedCodexCliVersion(version2) {
-  return /^0\.144\.\d+(?:[-+][0-9A-Za-z.-]+)?$/.test(version2) || /^0\.145\.0-alpha\.\d+$/.test(version2);
+  return /^0\.144\.\d+(?:[-+][0-9A-Za-z.-]+)?$/.test(version2) || /^0\.145\.0-alpha\.\d+$/.test(version2) || version2 === "0.145.0";
 }
 function parseUsage(value, lineNumber, field) {
   if (!isRecord(value)) {
@@ -23000,7 +23004,7 @@ var defaultRuntimeFactory = (options) => {
 };
 
 // dist/src/cli/version.js
-var CONTEXT_GC_VERSION = "0.1.8";
+var CONTEXT_GC_VERSION = "0.1.9";
 
 // dist/src/core/usage.js
 var DEFAULT_USAGE_WEIGHTS = Object.freeze({

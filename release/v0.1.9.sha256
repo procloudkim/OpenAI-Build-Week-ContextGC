@@ -1,0 +1,5 @@
+49e1512b54ac63947e4fda12e0de9d646acdf406c09250a8eb3d2a0c343e2444  scripts/contextgc.bundle.mjs
+73d818aedddc9be4f8721d4d48f0e731ebcbc4e544b28e702bc213d5a71cba4a  scripts/mcp-server.bundle.mjs
+cb45ffa8156f2cfc5dadbf6783d60d3c9962428588d806982001a372713fd813  hooks/run-hook.mjs
+0f03375e0b517a62a350e9c1bcd76e1fdda75fbb31b047a4ba7a63e0e74506cb  hooks/hooks.json
+7595e77d25ec0677315fdb74fb4cb3f945f18a39f9bed8b4e5a3a245bdc3d726  .codex-plugin/plugin.json

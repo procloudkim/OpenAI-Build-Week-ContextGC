@@ -6,10 +6,14 @@
 
 ![ContextGC cover](submission/assets/contextgc-cover.jpeg)
 
-ContextGC is a local-first, reversible context control plane for long Codex
-engineering tasks. It protects typed invariants, archives sanitized evidence by
-hash, prepares bounded Task Frames, and explains when checkpoint preparation is
-worth its usage and cache overhead.
+ContextGC is a local-persistence, reversible context control plane for long
+Codex engineering tasks. It protects typed invariants, archives sanitized
+evidence by hash, prepares bounded Task Frames, and explains when checkpoint
+preparation is worth its usage and cache overhead. “Reversible” means selecting
+a verified Task Frame checkpoint and rehydrating retained evidence; it does not
+restore redacted bytes, Git state, files, commands, or external side effects.
+Task Frames injected into a Codex turn are processed under the user's normal
+Codex service terms, so local persistence does not mean offline model use.
 
 It is a Developer Tools project for OpenAI Build Week.
 
@@ -36,20 +40,25 @@ The practical benefit is less re-explanation and less recovery work when a long
 task compacts or moves to a fresh thread. The current release does not claim a
 measured reduction in live Codex credits.
 
-## Judge in 60 seconds
+## Judge: 60-second public path
 
 1. Open the [hosted evidence explorer](https://contextgc-build-week.trytrytry.chatgpt.site)
-   after its signed-out access check and inspect the verified synthetic receipt.
-2. Reproduce that receipt from the checked-in, prebuilt CLI bundle. This path
-   requires Node.js 22.13 or newer but no dependency installation or rebuild:
+   and inspect the verified synthetic receipt. An unauthenticated HTTP GET
+   returned `200` on 2026-07-23; live hosting can still change.
+2. Compare it with the exact checked-in
+   [receipt](output/benchmark/benchmark-report.json), whose expected receipt
+   hash is `f7699823546f79657aea0faa290c0c648b8876236456f7a8ff02003875147ddd`.
+
+For an optional no-build local reproduction, use the pinned release. This path
+requires Node.js 22.13 or newer but no dependency installation or rebuild:
 
 ```powershell
-git clone https://github.com/procloudkim/OpenAI-Build-Week-ContextGC.git context-gc
+git clone --branch v0.1.9 --depth 1 https://github.com/procloudkim/OpenAI-Build-Week-ContextGC.git context-gc
 Set-Location context-gc
 node scripts/contextgc.bundle.mjs simulate
 ```
 
-3. To test the installed Codex surface on Windows, continue with:
+To test the installed Codex surface on Windows, continue with:
 
 ```powershell
 codex plugin marketplace add .
@@ -131,6 +140,10 @@ ContextGC does **not** claim to:
 - be lossless, globally optimal, or the first context-memory system;
 - convert tokens into actual ChatGPT/Codex credits.
 
+ContextGC never initiates native compaction. A trusted `PreCompact` hook can
+permit or block a **host-initiated** automatic compaction according to verified
+checkpoint, snapshot, and hook-state integrity.
+
 OpenAI's Codex hooks documentation describes `transcript_path` as convenient but
 unstable, so unknown versions and shapes disable automatic decisions rather than
 being guessed. OpenAI also does not publish a deterministic per-token conversion
@@ -142,11 +155,23 @@ Before persistence, ContextGC applies deterministic heuristics for known
 credential formats, secret-named fields, email addresses, international `+` or
 grouped phone formats, and home-user path segments. This is a data-minimization
 boundary, not a general PII detector; users must still keep sensitive task data
-out of prompts, reports, screenshots, and public artifacts.
+out of prompts, reports, screenshots, and public artifacts. Redaction takes
+precedence over exact retention: if a protected exact value is redacted, the
+original bytes are not checkpoint-recoverable and that source is ineligible for
+protected exact EXTERNALIZE advice.
 
 Official product references: [Codex hooks](https://learn.chatgpt.com/docs/hooks),
 [building plugins](https://learn.chatgpt.com/docs/build-plugins), and
 [compaction](https://developers.openai.com/api/docs/guides/compaction).
+
+### Codex memories coexistence
+
+Host-managed Codex memories and ContextGC serve different layers. Memories are
+advisory cross-chat recall; ContextGC stores a bounded, integrity-verified Task
+Frame and reversible evidence pointers around compaction. ContextGC does not
+read, modify, deduplicate, or treat native memories as checkpoint evidence.
+After a Codex memory or model update, verify that recalled guidance does not
+conflict with the current repository or the latest verified Task Frame.
 
 ## Verified synthetic benchmark
 
@@ -204,8 +229,9 @@ loads only sanitized synthetic data and cannot read a visitor's Codex files.
 It is an interactive evidence explorer and capability walkthrough, not a live
 Codex session or a benchmark running in the visitor's browser.
 
-The project owner must verify signed-out access immediately before submission;
-the checked-in site and receipt are not proof of current hosting visibility.
+Unauthenticated access returned HTTP `200` on 2026-07-23. The checked-in site
+and receipt remain reproducible evidence; this dated check is not a guarantee
+of future hosting availability.
 
 The checked-in CLI bundle reproduces the deterministic receipt without
 rebuilding:
@@ -216,10 +242,16 @@ node scripts/contextgc.bundle.mjs simulate
 
 ## Install the plugin on Windows
 
-Requirements: Node.js 22.13 or newer. Installation and discovery are verified
-with Codex CLI 0.144.5. Transcript telemetry is allowlisted only for Codex
-`0.144.x` and `0.145.0-alpha.x`; unknown schemas disable automatic decisions
-rather than being treated as compatible.
+Requirements: Node.js 22.13 or newer. Installation, discovery, and lifecycle
+hooks are verified with Codex CLI 0.145.0. Transcript telemetry is allowlisted
+only for Codex `0.144.x`, `0.145.0-alpha.x`, and the exact `0.145.0` stable
+schema; later versions disable automatic decisions rather than being treated as
+compatible.
+
+Release `v0.1.9` pins the reviewed source. Verify the checked-in
+[release hash manifest](release/v0.1.9.sha256) before trusting prebuilt bundles
+or hooks. Matching `/hooks` with the clone proves command parity; the release
+tag and manifest identify which source and bytes were reviewed.
 
 ```powershell
 codex plugin marketplace add .
@@ -230,7 +262,9 @@ Start a new Codex thread. Open `/hooks`, inspect `hooks/hooks.json`, and trust i
 only if it matches this repository. Installation alone does not trust bundled
 hooks. In normal installed use, users and agents omit `dataDir`; ContextGC
 infers its private local store, while hooks and tools expose only an opaque
-`storeId`. An absolute `dataDir` is an advanced override that must stay local
+`storeId`. The injected Task Frame labels that same digest
+`contextgcStoreId`; MCP structured results label it `storeId`. An absolute
+`dataDir` is an advanced override that must stay local
 and must never be pasted into prompts or reports.
 
 ### Minimal notification policy
@@ -251,7 +285,7 @@ plugin can verify.
 
 Checkpoint freshness is advisory. When recent work outgrows the latest verified
 Task Frame, `PreCompact` preserves that frame as a byte-verified fallback and
-allows native compaction; the result notice says that recent work relies on
+permits the host-initiated native compaction; the result notice says that recent work relies on
 Codex's opaque native summary. ContextGC blocks automatic compaction only when
 checkpoint integrity or durable snapshot/state persistence cannot be verified.
 
@@ -369,9 +403,9 @@ Repository: [github.com/procloudkim/OpenAI-Build-Week-ContextGC](https://github.
 
 Demo: [contextgc-build-week.trytrytry.chatgpt.site](https://contextgc-build-week.trytrytry.chatgpt.site)
 
-The public YouTube video and final Devpost form remain submission-specific gates
-until their live URLs are verified. The primary `/feedback` Session ID is
-entered only in the Devpost UI and must never be committed here.
+The owner completed the Devpost submission. Live submission/video URLs are not
+duplicated here, and the primary `/feedback` Session ID remains only in the
+Devpost UI; none of those private submission values should be committed.
 
 The Build Week story is available as a public-safe [project journey](docs/project-journey.md)
 and [한국어 프로젝트 일대기](docs/project-journey.ko.md).

@@ -15,7 +15,7 @@
 - **Done when:** the relevant focused tests and the full verification path pass,
   generated artifacts are synchronized, and the resulting diff contains only
   the intended change.
-- **Freshness date:** 2026-07-19.
+- **Freshness date:** 2026-07-23.
 
 ## Set up a development checkout
 
@@ -29,9 +29,9 @@ npm ci --ignore-scripts
 npm --prefix site ci --ignore-scripts
 ```
 
-Expected observable: both commands finish with `found 0 vulnerabilities` for
-the lockfile state verified for release `0.1.8`. Treat a later audit result as a
-new finding rather than preserving this sentence indefinitely.
+Expected observable: both commands exit successfully and install the lockfile
+state. Treat npm audit output as a dated external observation, not a stable
+release invariant; investigate any current finding separately.
 
 Failure boundary: network access is required for the initial public clone and
 dependency installation. Node versions below the package engine floor are
@@ -72,7 +72,7 @@ before publishing.
 | `npm run stage:plugin` | Skill, hook, MCP, CLI, or manifest change | `plugins/context-gc` is regenerated |
 | `npm run smoke:bundles` | No-build CLI/MCP distribution | CLI and MCP bundle report `pass` |
 | `npm --prefix site test` | Demo UI or receipt presentation | Site builds and rendered tests pass |
-| `npm run verify` | Release or pull request | Every preceding release gate passes |
+| `npm run verify` | Release or pull request | All automated gates in this table pass; installed-host discovery and hook trust remain separate manual gates |
 
 The release receipt currently expected from unchanged fixtures is:
 
@@ -113,7 +113,8 @@ not evidence of an improvement by itself.
 3. Confirm automatic `PreCompact` remains fail-closed for integrity or durable
    persistence failures, while checkpoint freshness alone remains advisory.
 4. Confirm empty-store bootstrap is once per writable turn, Plan mode defers
-   without mutation, and model-visible output contains `storeId` but no path.
+   without mutation, and model-visible output contains MCP `storeId` or Task
+   Frame `contextgcStoreId` but no path.
 5. Run `npm run stage:plugin` and compare source/staged hook hashes.
 6. Reinstall using a new plugin version before claiming fresh-session behavior.
 
@@ -154,8 +155,15 @@ not evidence of an improvement by itself.
    both bundles.
 8. Run `codex plugin list`, `codex mcp list`, and a fresh
    `codex debug prompt-input` discovery check.
-9. Push the reviewed commit and wait for GitHub Actions.
-10. Update the submission checklist only after anonymous access succeeds; never
+9. Write and verify `release/v<version>.sha256` for both bundles, the hook
+   runner, hook manifest, and plugin manifest.
+10. Create or select the privacy-safe public release commit described below,
+    verify that its tree is byte-identical to the reviewed private commit, push
+    **only that public release ref** to public `main`, and create `v<version>` at
+    that public commit. Never push the private verification commit or its
+    ancestry to the public repository.
+11. Wait for GitHub Actions, then update the submission checklist only after
+    anonymous access succeeds; never
     turn a local path, Session ID, or authenticated-only URL into public
     evidence.
 
@@ -165,18 +173,23 @@ The private development repository may contain author metadata that does not
 belong in a public release even when the source tree is clean. Do not rewrite or
 force-push the private history solely to solve that publication boundary.
 
-For a new public repository:
+For the first release in a new public repository:
 
 1. freeze and verify the intended release commit on the private branch;
 2. create a new root commit whose tree is byte-identical to that commit;
-3. use the generic `ContextGC Contributors` release identity;
+3. use the generic `ContextGC Contributors <contributors@contextgc.local>`
+   release identity;
 4. verify that only one commit is reachable from the public release branch;
 5. push only that branch to the public repository's `main`; and
 6. never push `--all`, `--mirror`, private tags, notes, or other local refs.
 
-The prepared branch name for this release is `public-release-v0.1.8`. Compare
-its tree hash with `main` before every push. Repository visibility, anonymous
-clone, CI, and Devpost access remain external checks.
+If a clean-history release branch is needed, name it
+`submission-release-v<version>`. For later releases, create one new public
+commit whose parent is the current public `main` and whose tree is byte-identical
+to the verified private release commit. Verify both tree hashes before pushing
+only that release ref to the public `main`; never attach private ancestry.
+Create the public `v<version>` tag at that same public commit. Repository
+visibility, anonymous clone, CI, and Devpost access remain external checks.
 
 ## Pull request evidence
 

@@ -11,7 +11,11 @@ import type {
 } from "./types.js";
 
 export const CODEX_TRANSCRIPT_SCHEMA_ID = "codex-rollout-jsonl/event-msg-v1" as const;
-export const SUPPORTED_CODEX_CLI_VERSIONS = ["0.144.x", "0.145.0-alpha.x"] as const;
+export const SUPPORTED_CODEX_CLI_VERSIONS = [
+  "0.144.x",
+  "0.145.0-alpha.x",
+  "0.145.0",
+] as const;
 
 const KNOWN_TOP_LEVEL_TYPES = new Set([
   "session_meta",
@@ -118,7 +122,11 @@ export async function readCodexTranscriptTelemetry(path: string): Promise<Transc
 }
 
 export function isSupportedCodexCliVersion(version: string): boolean {
-  return /^0\.144\.\d+(?:[-+][0-9A-Za-z.-]+)?$/.test(version) || /^0\.145\.0-alpha\.\d+$/.test(version);
+  return (
+    /^0\.144\.\d+(?:[-+][0-9A-Za-z.-]+)?$/.test(version) ||
+    /^0\.145\.0-alpha\.\d+$/.test(version) ||
+    version === "0.145.0"
+  );
 }
 
 /**

@@ -16,6 +16,7 @@ import {
   isByteExactRef,
   RuntimeIntegrityError,
   TranscriptSchemaError,
+  isSupportedCodexCliVersion,
   readCodexTranscriptTelemetry,
   redactText,
   resolveRuntimePaths,
@@ -544,6 +545,39 @@ test("Codex telemetry adapter reads the guarded observed schema", async () => {
     cacheWriteInputTokens: 0,
     outputTokens: 10,
   });
+});
+
+test("Codex 0.145.0 stable telemetry fixture preserves guarded usage categories", async () => {
+  const transcript = resolve(
+    process.cwd(),
+    "tests",
+    "fixtures",
+    "codex-0.145.0-transcript.jsonl",
+  );
+
+  const telemetry = await readCodexTranscriptTelemetry(transcript);
+  assert.equal(telemetry.cliVersion, "0.145.0");
+  assert.equal(telemetry.events.length, 2);
+  assert.equal(telemetry.latestTotal?.inputTokens, 240);
+  assert.equal(telemetry.latestTotal?.cachedInputTokens, 160);
+  assert.equal(telemetry.latestTotal?.cacheWriteInputTokens, 20);
+  assert.equal(telemetry.compactionCount, 1);
+  assert.deepEqual(toCoreTokenUsage(telemetry.latestTotal!), {
+    uncachedInputTokens: 80,
+    cachedInputTokens: 160,
+    cacheWriteInputTokens: 20,
+    outputTokens: 12,
+  });
+});
+
+test("Codex telemetry version allowlist accepts only verified stable and prerelease schemas", () => {
+  assert.equal(isSupportedCodexCliVersion("0.144.6"), true);
+  assert.equal(isSupportedCodexCliVersion("0.145.0-alpha.30"), true);
+  assert.equal(isSupportedCodexCliVersion("0.145.0"), true);
+
+  assert.equal(isSupportedCodexCliVersion("0.145.1"), false);
+  assert.equal(isSupportedCodexCliVersion("0.145.0-beta.1"), false);
+  assert.equal(isSupportedCodexCliVersion("0.146.0"), false);
 });
 
 test("telemetry persistence hashes the source session identifier", async () => {

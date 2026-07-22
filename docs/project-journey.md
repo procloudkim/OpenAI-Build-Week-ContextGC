@@ -127,8 +127,14 @@ That boundary still needed one more correction. A fresh-session trial showed
 that `0.1.6` treated six tool events as if an intact checkpoint had failed
 integrity, interrupting automatic compaction with `STALE`. Release `0.1.7`
 separates semantic coverage from storage integrity: it preserves the verified
-older frame as a fallback, allows native compaction, and reports the coverage
+older frame as a fallback, permits the host-initiated native compaction, and reports the coverage
 gap in two lines. Corruption and failed durable writes remain fail-closed.
+
+Release `0.1.8` then made that advisory state agree across the PreCompact and
+PostCompact audit events; it did not change the `0.1.7` liveness correction.
+Release `0.1.9` validated the exact Codex CLI `0.145.0` stable transcript shape,
+kept later unverified schemas fail-closed, and aligned the public installation,
+privacy, checksum, and recovery documentation through zero-context cold reads.
 
 ## Evaluation without pretending
 
