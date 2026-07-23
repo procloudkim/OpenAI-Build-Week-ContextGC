@@ -6,6 +6,18 @@ All notable ContextGC changes are recorded here. Dates use ISO 8601.
 
 No unreleased changes.
 
+## [0.1.13] - 2026-07-23
+
+### Fixed
+
+- Override the MCP SDK's vulnerable `@hono/node-server` 1.x dependency with
+  patched `2.0.11` after `GHSA-frvp-7c67-39w9`.
+- Add a loopback-only compatibility regression for the `getRequestListener`
+  API used by the MCP SDK.
+- Update the demo to Next.js `16.2.11` after the newly disclosed
+  moderate-or-higher advisory set affecting releases through `16.2.10`.
+- Raise both CI dependency-audit gates from high to moderate severity.
+
 ## [0.1.11] - 2026-07-23
 
 ### Fixed

@@ -40,6 +40,19 @@ unsupported.
 Cleanup: dependency folders are ignored by Git. Remove only the exact checkout
 or dependency directory you intend to discard.
 
+## Dependency security overrides
+
+Security overrides are exact, temporary release controls rather than floating
+version ranges. `package.json` currently pins `@hono/node-server` `2.0.11`
+because the MCP SDK still declares vulnerable `1.x`, while the GitHub-reviewed
+Windows path advisory is fixed only in `2.0.5` and later. The direct loopback
+test exercises the `getRequestListener` API used by the SDK, and the complete
+MCP, bundle, site, and audit gates must pass before release.
+
+Remove this override when a verified MCP SDK release natively resolves a patched
+`@hono/node-server`. Do not replace it with `npm audit fix --force`, a floating
+range, or an untested major-version substitution.
+
 ## Repository map
 
 | Path | Responsibility | Primary verification |

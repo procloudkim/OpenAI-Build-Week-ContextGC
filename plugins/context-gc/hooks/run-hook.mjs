@@ -7,7 +7,7 @@ import { dirname, isAbsolute, resolve } from "node:path";
 const STATE_SCHEMA_VERSION = 1;
 const FRAME_SCHEMA_VERSION = 1;
 const NOTICE_SCHEMA_VERSION = 1;
-const CONTEXT_GC_VERSION = "0.1.11";
+const CONTEXT_GC_VERSION = "0.1.13";
 const README_URL = "https://github.com/procloudkim/OpenAI-Build-Week-ContextGC#readme";
 const MAX_USER_NOTICE_CHARS = 240;
 const MAX_USER_NOTICE_LINES = 3;

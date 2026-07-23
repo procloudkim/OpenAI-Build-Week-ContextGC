@@ -1,6 +1,6 @@
 # ContextGC 사용자 매뉴얼
 
-> 적용 버전: ContextGC 0.1.11
+> 적용 버전: ContextGC 0.1.13
 > 검증 기준선: Windows PowerShell, Node.js 22.13 이상, Codex CLI 0.145.0
 > 문서 검증일: 2026-07-23
 
@@ -107,9 +107,9 @@ git --version
 $cloneRoot = Join-Path $env:USERPROFILE 'source\repos'
 New-Item -ItemType Directory -Path $cloneRoot -Force | Out-Null
 Set-Location $cloneRoot
-git clone --branch v0.1.11 --depth 1 https://github.com/procloudkim/OpenAI-Build-Week-ContextGC.git context-gc
+git clone --branch v0.1.13 --depth 1 https://github.com/procloudkim/OpenAI-Build-Week-ContextGC.git context-gc
 Set-Location .\context-gc
-$manifest = Get-Content .\release\v0.1.11.sha256
+$manifest = Get-Content .\release\v0.1.13.sha256
 foreach ($line in $manifest) {
   if ($line -notmatch '^([a-f0-9]{64})  (.+)$') { throw 'Malformed hash manifest.' }
   $expected, $path = $Matches[1], $Matches[2]
@@ -149,7 +149,7 @@ codex plugin list
 기대 결과:
 
 ```text
-context-gc@context-gc-local  installed, enabled  0.1.11
+context-gc@context-gc-local  installed, enabled  0.1.13
 ```
 
 이미 같은 로컬 marketplace가 등록되어 있다면 중복 추가 오류가 날 수
@@ -518,7 +518,7 @@ finally {
 }
 ```
 
-ContextGC 0.1.11의 기대 결과는 다음과 같습니다.
+ContextGC 0.1.13의 기대 결과는 다음과 같습니다.
 
 ```text
 ok                    : True
@@ -546,7 +546,7 @@ cleaned=True
 ```powershell
 Set-Location 'D:\path\to\context-gc'
 git status --short
-$targetVersion = 'v0.1.11'
+$targetVersion = 'v0.1.13'
 git fetch --tags --prune
 git checkout --detach $targetVersion
 ```
@@ -563,7 +563,7 @@ codex plugin list
 ```
 
 기대 결과는 설치된 row의 version이 새 plugin manifest와 일치하는 것입니다.
-`0.1.11`에서는 add-only 갱신을 검증했습니다. version이 그대로라면 Codex
+`0.1.13`에서는 add-only 갱신을 검증했습니다. version이 그대로라면 Codex
 process를 닫고 private store를 먼저 백업한 뒤에만 `plugin remove`와 `plugin
 add`를 순서대로 실행하십시오. versioned cache를 직접 덮어쓰지 마십시오.
 

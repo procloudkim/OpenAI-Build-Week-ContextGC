@@ -17982,7 +17982,7 @@ var defaultRuntimeFactory = (options) => {
 };
 
 // dist/src/cli/version.js
-var CONTEXT_GC_VERSION = "0.1.11";
+var CONTEXT_GC_VERSION = "0.1.13";
 
 // dist/src/cli/commands.js
 function runtimeOptions(args, io) {

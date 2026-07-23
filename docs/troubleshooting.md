@@ -67,7 +67,7 @@ Expected observable: the JSON contains both `context-gc` and `ContextGC` skill
 metadata. This command is an experimental diagnostic surface, not a stable user
 API.
 
-If metadata is absent, confirm plugin version `0.1.11`, reinstall, and start a
+If metadata is absent, confirm plugin version `0.1.13`, reinstall, and start a
 new thread. Do not manually overwrite the installed cache.
 
 ### Reinstall fails with Windows `Access denied`
@@ -190,7 +190,7 @@ invariants fail.
 
 This was a `0.1.6` liveness regression: six tool events or twenty minutes could
 turn checkpoint freshness into a blocking integrity verdict. Upgrade to
-`0.1.7` or newer (`0.1.11` is the current documented release). The `0.1.7`
+`0.1.7` or newer (`0.1.13` is the current documented release). The `0.1.7`
 correction snapshots the verified older Task Frame,
 permits the host-initiated compaction, and reports the recent-work coverage gap without
 interrupting the conversation. Missing, invalid, or unwritable recovery state
@@ -255,7 +255,7 @@ If erasure is intended, inspect and delete only the exact reviewed store using
 your normal OS workflow. Do not delete its parent, a repository root, the user
 profile, or the Codex home directory.
 
-ContextGC intentionally has no recursive-delete command in release `0.1.11`.
+ContextGC intentionally has no recursive-delete command in release `0.1.13`.
 
 ## Escalation
 

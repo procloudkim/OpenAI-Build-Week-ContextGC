@@ -142,6 +142,10 @@ Release `0.1.11` fixed a CI-discovered redaction boundary case: runtime-owned
 checkpoint identity is now assembled after user-field minimization and its
 already-sanitized Task Frame is archived without a second content scan. A
 deterministic phone-shaped UUID regression test preserves the invariant.
+Release `0.1.13` then cleared the remaining moderate dependency advisory with
+an exact patched Hono override. Because that override crosses the MCP SDK's
+declared major range, a loopback test now exercises the specific adapter API
+the SDK imports, and CI rejects future moderate-or-higher audit findings.
 
 ## Evaluation without pretending
 

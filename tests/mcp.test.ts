@@ -1,9 +1,13 @@
 import assert from "node:assert/strict";
+import { createServer } from "node:http";
 import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { once } from "node:events";
+import type { AddressInfo } from "node:net";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
 
+import { getRequestListener } from "@hono/node-server";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
 
@@ -24,6 +28,27 @@ const REF = {
   secretScanStatus: "clean" as const,
   redactions: 0,
 };
+
+test("patched Hono v2 request listener preserves the MCP SDK adapter contract", async () => {
+  const server = createServer(
+    getRequestListener(
+      async (request) => new Response(new URL(request.url).pathname),
+      { overrideGlobalObjects: false },
+    ),
+  );
+  server.listen(0, "127.0.0.1");
+  await once(server, "listening");
+
+  try {
+    const { port } = server.address() as AddressInfo;
+    const response = await fetch(`http://127.0.0.1:${port}/compatibility`);
+    assert.equal(response.status, 200);
+    assert.equal(await response.text(), "/compatibility");
+  } finally {
+    server.close();
+    await once(server, "close");
+  }
+});
 
 function fakeRuntime(overrides: Partial<ContextGcService> = {}): ContextGcService {
   return {

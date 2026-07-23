@@ -89,6 +89,7 @@ are still processed by that session's model.
 | Personal data in Task Frames | Closed frame schema, repository-relative active files, safe evidence pointers, deterministic redaction heuristics, and an explicit residual-risk warning |
 | Legacy checkpoint injection or lineage | Required privacy-boundary marker; markerless legacy latest remains local and immutable but cannot be hook-injected or linked as a verified parent |
 | Secret disclosure in shared demo artifacts | Synthetic fixtures and an explicit sanitizer gate |
+| Vulnerable transitive dependency | Exact lockfile overrides, direct compatibility regression, moderate-or-higher CI audit gate, and removal when upstream adopts the patched major |
 | Misleading economic claim | `usageProxy`; optional API-equivalent estimate kept separate; credits remain unknown |
 
 ## Data deletion

@@ -55,7 +55,7 @@ ContextGC는 Markdown 기록을 없애지 않습니다. 그 위에 다음과 같
 재현할 수 있습니다.
 
 ```powershell
-git clone --branch v0.1.11 --depth 1 https://github.com/procloudkim/OpenAI-Build-Week-ContextGC.git context-gc
+git clone --branch v0.1.13 --depth 1 https://github.com/procloudkim/OpenAI-Build-Week-ContextGC.git context-gc
 Set-Location context-gc
 node scripts/contextgc.bundle.mjs simulate
 ```
@@ -202,8 +202,8 @@ ContextGC를 토큰 절약 우승자가 아니라 safety/audit controller로 배
 - transcript telemetry allowlist: Codex `0.144.x`, `0.145.0-alpha.x`, 정확히
   `0.145.0` stable
 
-`v0.1.11` tag가 검토한 source를 고정합니다. prebuilt bundle이나 hook을
-신뢰하기 전에 [release hash manifest](release/v0.1.11.sha256)를 확인하십시오.
+`v0.1.13` tag가 검토한 source를 고정합니다. prebuilt bundle이나 hook을
+신뢰하기 전에 [release hash manifest](release/v0.1.13.sha256)를 확인하십시오.
 `/hooks`와 clone의 일치는 명령 parity를 확인하고, tag와 manifest는 검토한
 source와 bytes를 식별합니다.
 

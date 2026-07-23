@@ -134,6 +134,10 @@ compaction은 허용하며, coverage gap만 2줄로 알립니다. Corruption과 
 최소화한 뒤 runtime-owned checkpoint identity를 조립하고, 이미 정제된 Task
 Frame은 두 번째 content scan 없이 보관합니다. 전화번호 형태 UUID를 고정한
 regression test로 이 invariant를 보호합니다.
+`0.1.13`는 정확한 patched Hono override로 남은 moderate dependency
+advisory를 제거했습니다. 이 override는 MCP SDK가 선언한 major 범위를
+넘으므로 SDK가 import하는 adapter API를 loopback test로 직접 실행하고, CI가
+앞으로 moderate 이상 audit finding을 차단하도록 강화했습니다.
 
 ## 과장하지 않는 평가
 
